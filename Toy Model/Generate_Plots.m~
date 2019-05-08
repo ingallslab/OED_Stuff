@@ -38,9 +38,10 @@ hold on
 plot(uVals,sparse(zVals));
 hold off
 
-%generating normally distributed date points
+%generating normally distributed data points (~N(0,0.1))
 disp(length(sparse(sVals)));
-normRands = randn([100,1]);
-disp(leg
-disp(normRands+sparse(sVals));
-plot(uVals,sparse(sVals)+normRands);
+normRands = normrnd(0,0.1,[100,1]);
+Redist_sVals = abs(normRands+sVals(:));%normally redistributed sVals
+scatter(uVals,sparse(Redist_sVals),'filled');
+
+%generating more interesting normally distributed data points

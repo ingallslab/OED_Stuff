@@ -38,8 +38,20 @@ hold on
 plot(uVals,sparse(zVals));
 hold off
 
-%generating normally distributed date points
+%generating normally distributed data points (~N(0,0.1))
 disp(length(sparse(sVals)));
 normRands = normrnd(0,0.1,[100,1]);
 Redist_sVals = abs(normRands+sVals(:));%normally redistributed sVals
 scatter(uVals,sparse(Redist_sVals),'filled');
+
+%generating more interesting normally distributed data points
+xNormRands = linspace(0,1,100); %preallocating array for efficiency
+%x dependent random variables -> N(0,x*0.2)
+for i=1:100
+    xNormRands(i) = normrnd(0,0.2*sVals(i));
+end
+xRedist_sVals = abs(xNormRands+sVals(:));
+scatter(uVals,sparse(xRedist_sVals),'filled');
+
+
+%generating data points from SSA -> more complicated!
