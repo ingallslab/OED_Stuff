@@ -81,20 +81,17 @@ finTime = 1500;
 for i=1:10
     generatedData(:,i)=SSA_Func(zeros(40,1),inputVals(i),Omega,finTime,40);
 end
-disp(generatedData);
+%disp(generatedData);
 hold on
 for i=1:10
     scatter(ones(40,1)*inputVals(i),generatedData(:,i));
 end
 hold off
 
-fileID = fopen('SSADA.txt','w');
-fprintf(fileID,'%6s %12s\n','x','exp(x)');
-fprintf(fileID,'%6.2f %12.8f\n',A);
-fclose(fileID);
+dlmwrite('./Toy_Model/Data/SSA_Data_90.txt',generatedData,'\t');
 
-
-
+deviations=linspace(1:10);
+devation
 
 
 

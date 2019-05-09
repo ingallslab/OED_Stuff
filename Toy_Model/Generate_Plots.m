@@ -35,10 +35,6 @@ sVals = xStar(uVals,[a,K,n]); %s stands for steady state
 zVals = xStar(uVals,[a,K,m]); %I wanted to see what n=2 looks like
 
 %sparse converts casadi.DM classtype to a list of doubles
-plot(uVals,sparse(sVals)); 
-hold on
-%plot(uVals,sparse(zVals));
-hold off
 
 %generating normally distributed data points (~N(0,0.1))
 normRands = normrnd(0,0.1,[100,1]);
@@ -72,20 +68,31 @@ end
 %hold off
 %%
 %%%-----------------Stochastic Simulation Algorithm-----------------
-generatedData = meshgrid(1:10,1:40);
-inputVals = linspace(0,40,10);
+generatedData = meshgrid(1:30,1:40);
+inputVals = linspace(0,40,30);
 
 Omega = 90;
 finTime = 1500;
 
-for i=1:10
+for i=1:30
     generatedData(:,i)=SSA_Func(zeros(40,1),inputVals(i),Omega,finTime,40);
 end
-disp(generatedData);
-hold on
-for i=1:10
-    scatter(ones(40,1)*inputVals(i),generatedData(:,i));
+
+deviations=linspace(1,30,30);
+for i=1:30
+    deviations(i) = std(generatedData(:,i));
 end
+
+%disp(generatedData);
+%for i=1:10
+    %scatter(ones(40,1)*inputVals(i),generatedData(:,i));
+%end
+figure;hold on
+%   error bars
+h1=fill([inputVals';flipud(inputVals')],[sparse(xStar(inputVals,[a,K,n]))'-deviations';
+    flipud(sparse(xStar(inputVals,[a,K,n]))'+deviations')],[.4 .4 .7],'linestyle','none');%,'-','LineWidth',2);
+set(h1,'facealpha',.3)
+plot(uVals,sparse(sVals)); 
 hold off
 
 dlmwrite('./Toy_Model/Data/SSA_Data_90.txt',generatedData,'\t');
