@@ -28,7 +28,7 @@ xStar = Function('xStar',{u_sym,theta},{xstar});
 
 
 %%
-%%%-----------------plot generation begins here-----------------
+%%%-----------------Plot Generator-----------------
 %%%
 uVals = linspace(0,40,100);
 sVals = xStar(uVals,[a,K,n]); %s stands for steady state
@@ -41,7 +41,6 @@ hold on
 hold off
 
 %generating normally distributed data points (~N(0,0.1))
-disp(length(sparse(sVals)));
 normRands = normrnd(0,0.1,[100,1]);
 Redist_sVals = abs(normRands+sVals(:));%normally redistributed sVals
 %scatter(uVals,sparse(Redist_sVals),'filled');
@@ -66,15 +65,38 @@ properVals_p = meshgrid(1:15,1:15);
 for i=1:15
     properVals_p(:,i) = abs(outputVals_p(i)+normrnd(0,outputVals_p(i)*0.08,[15,1]));
 end
-disp(properVals_p);
+%hold on
+%for i=1:15
+%    scatter(ones(1,15)*inputVals_p(i),properVals_p(:,i));
+%end
+%hold off
+%%
+%%%-----------------Stochastic Simulation Algorithm-----------------
+generatedData = meshgrid(1:10,1:40);
+inputVals = linspace(0,40,10);
+
+Omega = 90;
+finTime = 1500;
+
+for i=1:10
+    generatedData(:,i)=SSA_Func(zeros(40,1),inputVals(i),Omega,finTime,40);
+end
+disp(generatedData);
 hold on
-for i=1:15
-    scatter(ones(1,15)*inputVals_p(i),properVals_p(:,i));
+for i=1:10
+    scatter(ones(40,1)*inputVals(i),generatedData(:,i));
 end
 hold off
 
-%%
-%%%stochastic simulation algorithm
+dlmwrite('./Toy_Model/Data/SSA_Data_90.txt',generatedData,'\t');
+
+
+
+
+
+
+
+
 
 
 
