@@ -25,42 +25,39 @@ xstar = a_sym *(u_sym.^n_sym)./(u_sym.^n_sym+K_sym.^n_sym);
 xStar = Function('xStar',{u_sym,theta},{xstar}); 
 %tell matlab to consider xStar as a function with value xstar
 
-
-
-%%
-%%%-----------------Plot Generator-----------------
-%%%
 uVals = linspace(0,40,100);
 sVals = xStar(uVals,[a,K,n]); %s stands for steady state
-zVals = xStar(uVals,[a,K,m]); %I wanted to see what n=2 looks like
 
-%sparse converts casadi.DM classtype to a list of doubles
+%%
+%%%-----------------Old Plot Generator-----------------
 
+%zVals = xStar(uVals,[a,K,m]); %I wanted to see what n=2 looks like
+%
+%%sparse converts casadi.DM classtype to a list of doubles
+%
 %generating normally distributed data points (~N(0,0.1))
-normRands = normrnd(0,0.1,[100,1]);
-Redist_sVals = abs(normRands+sVals(:));%normally redistributed sVals
+%normRands = normrnd(0,0.1,[100,1]);
+%Redist_sVals = abs(normRands+sVals(:));%normally redistributed sVals
 %scatter(uVals,sparse(Redist_sVals),'filled');
-
-%generating more interesting normally distributed data points
+%
+%%generating more interesting normally distributed data points
 %xNormRands = linspace(0,1,100); %preallocating array for efficiency
-%x dependent random variables -> N(0,x*0.2)
+%%x dependent random variables -> N(0,x*0.2)
 %for i=1:100
-    %xNormRands(i) = normrnd(0,0.2*sVals(i));
+%   xNormRands(i) = normrnd(0,0.2*sVals(i));
 %end
 %xRedist_sVals = abs(xNormRands+sVals(:));
 %scatter(uVals,sparse(xRedist_sVals),'filled');
-
-%properly generating normally distributed "experimental" data
-
-inputVals_p = linspace(0,40,15);
-outputVals_p = sparse(xStar(inputVals_p,[a,K,n]));
-
-
-
-properVals_p = meshgrid(1:15,1:15);
-for i=1:15
-    properVals_p(:,i) = abs(outputVals_p(i)+normrnd(0,outputVals_p(i)*0.08,[15,1]));
-end
+%
+%%properly generating normally distributed "experimental" data
+%
+%inputVals_p = linspace(0,40,15);
+%outputVals_p = sparse(xStar(inputVals_p,[a,K,n]));
+%
+%properVals_p = meshgrid(1:15,1:15);
+%for i=1:15
+%    properVals_p(:,i) = abs(outputVals_p(i)+normrnd(0,outputVals_p(i)*0.08,[15,1]));
+%end
 %hold on
 %for i=1:15
 %    scatter(ones(1,15)*inputVals_p(i),properVals_p(:,i));
