@@ -3,29 +3,25 @@ import casadi.*
 close all
 
 expData = dlmread('./Toy_Model/Data/SSA_Data_90.txt','\t');
+inputs = dlmread('./Toy_Model/Data/SSA_Data_90_uVals.txt','\t');
 
-%casadi setup
-x_sym = SX.sym('x');
-u_sym = SX.sym('u');
-a_sym = SX.sym('a');
-K_sym = SX.sym('K');
-n_sym = SX.sym('n');
-theta = [a_sym,K_sym,n_sym];
-sigma_sym = SX.sym('sigma');
-
-xstar = a_sym *(u_sym.^n_sym)./(u_sym.^n_sym+K_sym.^n_sym); 
-
-x_obs_sym = SX.sym('x_obs');
-
-lik = (1/(sqrt(2*pi)*sigma_sym))*exp(-((x_obs_sym-xstar).^2)./(2*sigma_sym.^2));
-loglik = log(lik);
-loglik_f = Function('loglik_f',{x_obs_sym,u_sym,theta_sym,sigma_sym},{loglik});
-
-loglik_th = jacobian(loglik,theta_sym);
-loglik_th_f = Function('loglik_theta_f',{x_obs_sym,u_sym,theta_sym,sigma_sym},{loglik_th});
-
-deviations=linspace(1,30,30);
-for i=1:30
+deviations=linspace(1,size(expData,2),size(expData,2));
+for i=1:size(expData,2)
     deviations(i) = std(expData(:,i));
 end
 
+a=3;
+K=9;
+n=3;
+theta = [a,K,n];
+
+disp(computeLikelihood(expData,inputs,[a,K,n],deviations));
+disp(compLikelihood_nocasadi(expData,inputs,theta,deviations));
+
+objective = @(th) -compLikelihood_nocasadi(expData,inputs,th,deviations);
+options = optimset('PlotFcns',@optimplotfval);
+min = fminsearch(objective,[2.5,9.5,3.2],options);
+
+disp(min);
+
+disp(min - theta);

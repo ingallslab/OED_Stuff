@@ -65,18 +65,22 @@ sVals = xStar(uVals,[a,K,n]); %s stands for steady state
 %hold off
 %%
 %%%-----------------Stochastic Simulation Algorithm-----------------
-generatedData = meshgrid(1:30,1:40);
-inputVals = linspace(0,40,30);
+
+numExperiments = 40;
+numSamples = 20;
+
+generatedData = meshgrid(1:numExperiments,1:numSamples);
+inputVals = linspace(0,40,numExperiments);
 
 Omega = 90;
 finTime = 1500;
 
-for i=1:30
-    generatedData(:,i)=SSA_Func(zeros(40,1),inputVals(i),Omega,finTime,40);
+for i=1:numExperiments
+    generatedData(:,i)=SSA_Func(zeros(numSamples,1),inputVals(i),Omega,finTime,numSamples);
 end
 
-deviations=linspace(1,30,30);
-for i=1:30
+deviations=linspace(1,numExperiments,numExperiments);
+for i=1:numExperiments
     deviations(i) = std(generatedData(:,i));
 end
 
@@ -93,7 +97,7 @@ plot(uVals,sparse(sVals));
 hold off
 
 dlmwrite('./Toy_Model/Data/SSA_Data_90.txt',generatedData,'\t');
-
+dlmwrite('./Toy_Model/Data/SSA_Data_90_uVals.txt',inputVals,'\t');
 
 
 
