@@ -32,5 +32,7 @@ function loglikelihood = computeLikelihood(xVals, uVals, theta, sigmaVals)
             %disp(loglikelihood);
         end
     end
+    
+    loglikelihood=full(loglikelihood);
    
 end
