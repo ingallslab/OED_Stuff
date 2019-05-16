@@ -2,10 +2,8 @@ addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5'
 import casadi.*
 close all
 
-u_vec = [0:0.005:0.3];
+u_vec = [0:0.003:0.3];
 experimentInputs = [0:0.05:0.3];
-
-numU = length(uVals);
 
 a0 = 0.5;
 a = 3;
@@ -13,66 +11,6 @@ K = 9;
 n = 3;
 
 theta_t = [a0,a,K,n];
-
-% Pulling from generated data
-% u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)] ;%linspace(0.2,0.3,32)
-% totU=length(u);
-% 
-% xmin = 0;
-% xmax = 4.0;
-% histgrid = linspace(xmin,xmax,Nh);
-% 
-% xGenerated=[];
-% uTot_new=0;
-% u_new=[];
-% for i=1:totU
-%     [i totU];
-%     %strcat('drive_2/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt')
-%     %tmp=load(strcat('data/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'_Nr=100000.txt'));
-%     tmp = load(strcat('1D_stuff/drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
-%     sz=size(tmp);
-%     if i==1||sz(1)==sz_hst(1)
-%         xGenerated = [xGenerated tmp];
-%         sz_hst = size(xGenerated);
-%         uTot_new = uTot_new+1;
-%         u_new=[u_new u(i)];
-%     else
-%         testy=0;
-%     end
-%     
-% end
-% 
-% totU=uTot_new;
-% u=u_new;
-
-
-u_monostable1=[]; u_monostable2=[];u_lowbranch=[];u_highbranch=[];u_midbranch=[];
-x_monostable1=[]; x_monostable2=[];x_lowbranch=[];x_highbranch=[];x_midbranch=[];
-flg=0;
-for i=1:length(u_vec)
-    [lPt,mPt,hPt]=fixed_point_v4(u_vec(i),theta_t);
-
-    if (lPt==hPt&&flg==0)
-        u_monostable1=[u_monostable1 u_vec(i)];
-        x_monostable1=[x_monostable1 lPt];
-
-    elseif(lPt==hPt&&flg==1)
-        u_monostable2=[u_monostable2 u_vec(i)];
-        x_monostable2=[x_monostable2 lPt];
-    else
-        u_lowbranch=[u_lowbranch u_vec(i)];
-        x_lowbranch=[x_lowbranch lPt];
-        u_highbranch=[u_highbranch u_vec(i)];
-        x_highbranch=[x_highbranch hPt];
-        u_midbranch = [u_midbranch u_vec(i)];
-        x_midbranch=[x_midbranch mPt];
-        flg=1;
-    end
-end
-U_Low=[u_monostable1 u_lowbranch];
-X_Low=[x_monostable1 x_lowbranch];
-U_High=[u_highbranch u_monostable2];
-X_High=[x_highbranch x_monostable2];
 
 uE_monostable1=[]; uE_monostable2=[];uE_lowbranch=[];uE_highbranch=[];uE_midbranch=[];
 xE_monostable1=[]; xE_monostable2=[];xE_lowbranch=[];xE_highbranch=[];xE_midbranch=[];
@@ -103,45 +41,45 @@ UE_High=[uE_highbranch uE_monostable2];
 XE_High=[xE_highbranch xE_monostable2];
 
 experimentData = [];
-sigmaData = [];
+sigmas=[];
 for i = 1:length(xE_monostable1)
-    experimentData = [experimentData normrnd(xE_monostable1(i),0.1,[20,1])];
+    experimentData = [experimentData normrnd(xE_monostable1(i),0.2,[10,1])];
 end
 for i = 1:length(xE_lowbranch)
-    experimentData = [experimentData [normrnd(xE_lowbranch(i),0.1,[10,1]); normrnd(xE_highbranch(i),0.1,[10,1])]];
+    experimentData = [experimentData [normrnd(xE_lowbranch(i),0.2,[5,1]); normrnd(xE_highbranch(i),0.2,[5,1])]];
 end
 for i = 1:length(xE_monostable2)
-    experimentData = [experimentData normrnd(xE_monostable2(i),0.1,[20,1])];
+    experimentData = [experimentData normrnd(xE_monostable2(i),0.2,[10,1])];
 end
+for i = 1:length(xE_monostable1)
+    sigmas = [sigmas [std(experimentData(:,i));0]]; 
+end
+for i = 1:length(xE_lowbranch)
+    sigmas = [sigmas [std(experimentData(1:end/2,i)); std(experimentData(end/2+1:end,i))]]; 
+end
+for i = 1:length(xE_monostable2)
+    sigmas = [sigmas [0;std(experimentData(:,i))]]; 
+end
+%disp(experimentData);
+disp(sigmas);
 
-disp(experimentData);
+%optimize
 
-%Dip stat
-% dip = [];
-% uLow = 0;
-% uHigh = 0;
-% for i = 1:size(experimentData,2)
-%     dip = [dip HartigansDipTest(sort(experimentData(:,i)))];
-%     if (uLow==0)&& (dip(i)>=0.1)
-%         uLow = experimentInputs(i);
-%     elseif (uLow ~=0)&&(uHigh ==0)&& (dip(i)<=0.1)
-%         uHigh = experimentInputs(i-1);
-%     end
-% end
-% Bounds = [uLow, uHigh];
-% disp(Bounds);
-% plot(experimentInputs,dip);
+objective = @(theta) -computeLikelihood_v2(experimentData,experimentInputs,theta,sigmas);
+options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3);
+disp(['true =' num2str(-computeLikelihood_v2(experimentData, experimentInputs, [a0,a,K,n],sigmas))])
+
+min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
 
 %Plotting
 hold on
-plot(U_Low,X_Low,'b');
-plot(u_midbranch,x_midbranch,'k:');
-plot(U_High,X_High,'r');
+plotbif(u_vec,theta_t);
+plotbif(u_vec,min,'black');
 for i=1:length(UE_Low)
-    errorbar(UE_Low(i),XE_Low(i),0.1);
+    errorbar(UE_Low(i),XE_Low(i),0.2);
 end
 for i=1:length(UE_High)
-    errorbar(UE_High(i),XE_High(i),0.1);  
+    errorbar(UE_High(i),XE_High(i),0.2);  
 end
 hold off
 
