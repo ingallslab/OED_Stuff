@@ -2,9 +2,6 @@ addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5'
 import casadi.*
 close all
 
-u_vec = [0:0.003:0.3];
-experimentInputs = [0:0.05:0.3];
-
 a0 = 0.5;
 a = 3;
 K = 9;
@@ -12,75 +9,69 @@ n = 3;
 
 theta_t = [a0,a,K,n];
 
-uE_monostable1=[]; uE_monostable2=[];uE_lowbranch=[];uE_highbranch=[];uE_midbranch=[];
-xE_monostable1=[]; xE_monostable2=[];xE_lowbranch=[];xE_highbranch=[];xE_midbranch=[];
-flg=0;
-for i=1:length(experimentInputs)
-    [lPt,mPt,hPt]=fixed_point_v4(experimentInputs(i),theta_t);
-
-    if (lPt==hPt&&flg==0)
-        uE_monostable1=[uE_monostable1 experimentInputs(i)];
-        xE_monostable1=[xE_monostable1 lPt];
-
-    elseif(lPt==hPt&&flg==1)
-        uE_monostable2=[uE_monostable2 experimentInputs(i)];
-        xE_monostable2=[xE_monostable2 lPt];
+u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+totU=length(u);
+xhist=[];
+uTot_new=0;
+u_new=[];
+hold on
+for i=1:20:totU
+    tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
+    tmp = tmp(1:1000:length(tmp));
+    sz=size(tmp);
+    if i==1||sz(1)==sz_hst(1)
+        xhist = [xhist tmp];
+        sz_hst = size(xhist);
+        uTot_new = uTot_new+1;
+        u_new=[u_new u(i)];
     else
-        uE_lowbranch=[uE_lowbranch experimentInputs(i)];
-        xE_lowbranch=[xE_lowbranch lPt];
-        uE_highbranch=[uE_highbranch experimentInputs(i)];
-        xE_highbranch=[xE_highbranch hPt];
-        uE_midbranch = [uE_midbranch experimentInputs(i)];
-        xE_midbranch=[xE_midbranch mPt];
-        flg=1;
-    end
+        test=0;
+    end 
+    scatter(u(i)*ones(size(tmp)),tmp);
 end
-UE_Low=[uE_monostable1 uE_lowbranch];
-XE_Low=[xE_monostable1 xE_lowbranch];
-UE_High=[uE_highbranch uE_monostable2];
-XE_High=[xE_highbranch xE_monostable2];
-
-experimentData = [];
-sigmas=[];
-for i = 1:length(xE_monostable1)
-    experimentData = [experimentData normrnd(xE_monostable1(i),0.2,[10,1])];
-end
-for i = 1:length(xE_lowbranch)
-    experimentData = [experimentData [normrnd(xE_lowbranch(i),0.2,[5,1]); normrnd(xE_highbranch(i),0.2,[5,1])]];
-end
-for i = 1:length(xE_monostable2)
-    experimentData = [experimentData normrnd(xE_monostable2(i),0.2,[10,1])];
-end
-for i = 1:length(xE_monostable1)
-    sigmas = [sigmas [std(experimentData(:,i));0]]; 
-end
-for i = 1:length(xE_lowbranch)
-    sigmas = [sigmas [std(experimentData(1:end/2,i)); std(experimentData(end/2+1:end,i))]]; 
-end
-for i = 1:length(xE_monostable2)
-    sigmas = [sigmas [0;std(experimentData(:,i))]]; 
-end
-%disp(experimentData);
-disp(sigmas);
+hold off
+totU=uTot_new;
+u=u_new;
+disp('xhist loaded');
+disp(num2cell(xhist,1));
+%disp(computeLikelihood_v3(xhist,u,[0.5,3,9,3,15,100]));
 
 %optimize
 
-objective = @(theta) -computeLikelihood_v2(experimentData,experimentInputs,theta,sigmas);
-options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3);
-disp(['true =' num2str(-computeLikelihood_v2(experimentData, experimentInputs, [a0,a,K,n],sigmas))])
+% objective = @(theta) -computeLikelihood_v2(xhist,u,theta);
+% options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3);
+% min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
 
-min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
+% options = optimset('Display','iter');
+% min = fminsearch(objective,[0.5,3,9,3],options);
+% disp(min);
+    
+% x_sym = SX.sym('x_sym');
+% u_sym = SX.sym('u_sym');
+% Omega_sym = SX.sym('Omega_sym');
+% 
+% a0_sym = SX.sym('a0_sym');
+% a_sym = SX.sym('a_sym');
+% K_sym = SX.sym('K_sym');
+% n_sym = SX.sym('n_sym');
+% 
+% theta_sym=[a0_sym; a_sym; K_sym; n_sym];
+% c0_sym = SX.sym('c0_sym');
+% c1_sym = SX.sym('c1_sym');
+% par_sym=[theta_sym; c0_sym;c1_sym];
+% 
+% objective = @(pars) computeLikelihood_v3(num2cell(xhist),u,pars);
+
+% constraint=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
+% 
+% nlp = struct('x',par_sym, 'f',objective, 'g', constraint);
+% min = nlpsol('min','ipopt',nlp);
+% disp(min);
 
 %Plotting
 hold on
 plotbif(u_vec,theta_t);
 plotbif(u_vec,min,'black');
-for i=1:length(UE_Low)
-    errorbar(UE_Low(i),XE_Low(i),0.2);
-end
-for i=1:length(UE_High)
-    errorbar(UE_High(i),XE_High(i),0.2);  
-end
 hold off
 
 %%
