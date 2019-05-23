@@ -70,8 +70,7 @@ disp(num2cell(xhist,1));
 % min = nlpsol('min','ipopt',nlp);
 % disp(min);
 
-computeLikelihood_v3(xhist,u,theta_t);
-
+min=casadiOptimize(xhist,u,[theta_t 15 100]);
 %Plotting
 u_vec = linspace(0,0.3,200);
 hold on

@@ -1,4 +1,4 @@
-function min = computeLikelihood_v3(xVals, uVals, params)
+function min = casadiOptimize(xVals, uVals, params)
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all
@@ -6,12 +6,13 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     Omega = 90;
     uLow = 0.1;
     uHigh = 0.2;
+
+    a0= params(1);
+    a = params(2);
+    K = params(3);
+    n = params(4);
+    theta = [a0 a K n];
     
-    theta = [params(1),params(2),params(3),params(4)];
-    a0= theta(1);
-    a = theta(2);
-    K = theta(3);
-    n = theta(4);
     Bounds = [0.1,0.2];
     
     tol=1e-4;
@@ -52,7 +53,7 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     g=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
     g_x=jacobian(g,x_sym);
     
-    sigma2=(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
+    sigma2=-(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
     pi0=1/(1+exp(-(c0_sym+c1_sym*u_sym)));
     
     x_obs_sym = SX.sym('x_obs_sym');
@@ -135,17 +136,17 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     x0starM=[];
     for i=1:length(uVals)
         [lpt,~,hpt] = fixed_point_v4(uVals(i),theta);
-        if lpt==hpt
+        if uVals(i)<uLow
+            x0starM=[x0starM;lpt];
+        elseif uVals(i)>uHigh
             x0starM=[x0starM;hpt];
         else
             x0starH=[x0starH;hpt];
             x0starL=[x0starL;lpt];
         end
     end
-    disp(x0starH);
-    disp(x0starL);
-    disp(x0starM);
-    x0=[x0starM;x0starH;x0starL;transpose(theta)];
+
+    x0=[x0starM;x0starH;x0starL;transpose(params)];
     
     %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});
     nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', vertcat(constraints{:}));
@@ -153,7 +154,7 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     disp('solver has generated, beginning optimization');
     disp(solver);
     solution = solver('x0',x0,'lbg',lbg,'ubg',ubg);
-    min = solution.x;
+    min = full(solution.x(end-5:end-2));
     disp(min);
 end
 

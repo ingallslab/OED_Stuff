@@ -1,85 +1,83 @@
-function thetas = Generate_Plots_v2(theta_true, numExperiments, numTrials, Omega)
+addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+import casadi.*
+close all
 
-    addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
-    import casadi.*
-    close all
+a0 = 0.5;
+a = 3;
+K = 9;
+n = 3;
 
-    a0 = 0.5;
-    a = 3;
-    K = 9;
-    n = 3;
+theta_t = [a0,a,K,n];
 
-    theta_t = [a0,a,K,n];
-
-    u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
-    totU=length(u);
-    xhist=[];
-    uTot_new=0;
-    u_new=[];
-    hold on
-    for i=1:10:totU
-        tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
-        tmp = tmp(1:500:length(tmp));
-        sz=size(tmp);
-        if i==1||sz(1)==sz_hst(1)
-            xhist = [xhist tmp];
-            sz_hst = size(xhist);
-            uTot_new = uTot_new+1;
-            u_new=[u_new u(i)];
-        else
-            test=0;
-        end
-        scatter(u(i)*ones(size(tmp)),tmp);
+u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+totU=length(u);
+xhist=[];
+uTot_new=0;
+u_new=[];
+hold on
+for i=1:10:totU
+    tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
+    tmp = tmp(1:500:length(tmp));
+    sz=size(tmp);
+    if i==1||sz(1)==sz_hst(1)
+        xhist = [xhist tmp];
+        sz_hst = size(xhist);
+        uTot_new = uTot_new+1;
+        u_new=[u_new u(i)];
+    else
+        test=0;
     end
-    hold off
-    totU=uTot_new;
-    u=u_new;
-    disp('xhist loaded');
-    disp(num2cell(xhist,1));
-    %disp(computeLikelihood_v3(xhist,u,[0.5,3,9,3,15,100]));
-
-    %optimize
-
-    objective = @(theta) -computeLikelihood_v2(xhist,u,theta);
-    options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3, 'ObjectiveLimit', 0.9e8);
-    min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
-    option2 = optimset('Display','iter');
-    min = fminsearch(objective, min,option2)
-
-    % options = optimset('Display','iter');
-    % min = fminsearch(objective,[0.5,3,9,3],options);
-    % disp(min);
-
-    % x_sym = SX.sym('x_sym');
-    % u_sym = SX.sym('u_sym');
-    % Omega_sym = SX.sym('Omega_sym');
-    %
-    % a0_sym = SX.sym('a0_sym');
-    % a_sym = SX.sym('a_sym');
-    % K_sym = SX.sym('K_sym');
-    % n_sym = SX.sym('n_sym');
-    %
-    % theta_sym=[a0_sym; a_sym; K_sym; n_sym];
-    % c0_sym = SX.sym('c0_sym');
-    % c1_sym = SX.sym('c1_sym');
-    % par_sym=[theta_sym; c0_sym;c1_sym];
-    %
-    % objective = @(pars) computeLikelihood_v3(num2cell(xhist),u,pars);
-
-    % constraint=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
-    %
-    % nlp = struct('x',par_sym, 'f',objective, 'g', constraint);
-    % min = nlpsol('min','ipopt',nlp);
-    % disp(min);
-
-    %Plotting
-    u_vec = linspace(0,0.3,200);
-    hold on
-    plotbif(u_vec,theta_t);
-    plotbif(u_vec,min,'black');
-    hold off
-
+    scatter(u(i)*ones(size(tmp)),tmp);
 end
+hold off
+totU=uTot_new;
+u=u_new;
+disp('xhist loaded');
+disp(num2cell(xhist,1));
+%disp(computeLikelihood_v3(xhist,u,[0.5,3,9,3,15,100]));
+
+%optimize
+
+% objective = @(theta) -computeLikelihood_v2(xhist,u,theta);
+% options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3, 'ObjectiveLimit', 0.9e8);
+% min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
+% option2 = optimset('Display','iter');
+% min = fminsearch(objective, min,option2)
+
+% options = optimset('Display','iter');
+% min = fminsearch(objective,[0.5,3,9,3],options);
+% disp(min);
+
+% x_sym = SX.sym('x_sym');
+% u_sym = SX.sym('u_sym');
+% Omega_sym = SX.sym('Omega_sym');
+%
+% a0_sym = SX.sym('a0_sym');
+% a_sym = SX.sym('a_sym');
+% K_sym = SX.sym('K_sym');
+% n_sym = SX.sym('n_sym');
+%
+% theta_sym=[a0_sym; a_sym; K_sym; n_sym];
+% c0_sym = SX.sym('c0_sym');
+% c1_sym = SX.sym('c1_sym');
+% par_sym=[theta_sym; c0_sym;c1_sym];
+%
+% objective = @(pars) computeLikelihood_v3(num2cell(xhist),u,pars);
+
+% constraint=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
+%
+% nlp = struct('x',par_sym, 'f',objective, 'g', constraint);
+% min = nlpsol('min','ipopt',nlp);
+% disp(min);
+
+opt=computeLikelihood_v3(xhist,u,[theta_t 15 100]);
+min = opt(end-6:end-2)
+%Plotting
+u_vec = linspace(0,0.3,200);
+hold on
+plotbif(u_vec,theta_t);
+plotbif(u_vec,min,'black');
+hold off
 
 %%
 function b=bmtest(x)

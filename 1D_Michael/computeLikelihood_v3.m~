@@ -6,12 +6,13 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     Omega = 90;
     uLow = 0.1;
     uHigh = 0.2;
+
+    a0= params(1);
+    a = params(2);
+    K = params(3);
+    n = params(4);
+    theta = [a0 a K n];
     
-    theta = [params(1),params(2),params(3),params(4)];
-    a0= theta(1);
-    a = theta(2);
-    K = theta(3);
-    n = theta(4);
     Bounds = [0.1,0.2];
     
     tol=1e-4;
@@ -83,89 +84,46 @@ function min = computeLikelihood_v3(xVals, uVals, params)
         u = uVals(i);
         
         if u<uLow
-                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-                xstars_m=[xstars_m; xstar_i];
-                
-                gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-                constraints = [constraints, {gstar}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                
+            xstar_i = SX.sym(strcat('xstar_',num2str(i)));
+            xstars_m=[xstars_m; xstar_i];
+
+            gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
+            constraints = [constraints, {gstar}];
+            lbg = [lbg; 0];
+            ubg = [ubg; 0];
+            for j = 1:size(xVals,1)
                 logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            elseif u>uHigh
-                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-                xstars_m=[xstars_m; xstar_i];
-                
-                gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-                constraints = [constraints, {gstar}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                for j = 1:size(xVals,1)
-                    logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            else
-                xstar_h = SX.sym(strcat('xstar_h_',num2str(i)));
-                xstars_h=[xstars_h; xstar_h];
-                xstar_l = SX.sym(strcat('xstar_l_',num2str(i)));
-                xstars_l=[xstars_l; xstar_l];
-                
-                constraints = [constraints, {xstar_l - xstar_h}];
-                lbg = [lbg; -inf];
-                ubg = [ubg; -0.001];
-                
-                gstar_h=a0_sym+a_sym*((u+xstar_h).^n_sym)./(K_sym+(u+xstar_h).^n_sym)-xstar_h;
-                constraints = [constraints, {gstar_h}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                gstar_l=a0_sym+a_sym*((u+xstar_l).^n_sym)./(K_sym+(u+xstar_l).^n_sym)-xstar_l;
-                constraints = [constraints, {gstar_l}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                for j = 1:size(xVals,1)
-                    logLik_tot = logLik_tot + logLik_func(xVals(j,i),xstar_l,xstar_h,u,par_sym,Omega);
-                end
             end
-        
-        
-        for j = 1:size(xVals,1)
-            if u<uLow
-                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-                xstars_m=[xstars_m; xstar_i];
-                
-                gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-                constraints = [constraints, {gstar}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                
+        elseif u>uHigh
+            xstar_i = SX.sym(strcat('xstar_',num2str(i)));
+            xstars_m=[xstars_m; xstar_i];
+
+            gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
+            constraints = [constraints, {gstar}];
+            lbg = [lbg; 0];
+            ubg = [ubg; 0];
+            for j = 1:size(xVals,1)
                 logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            elseif u>uHigh
-                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-                xstars_m=[xstars_m; xstar_i];
-                
-                gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-                constraints = [constraints, {gstar}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                
-                logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            else
-                xstar_h = SX.sym(strcat('xstar_h_',num2str(i)));
-                xstars_h=[xstars_h; xstar_h];
-                xstar_l = SX.sym(strcat('xstar_l_',num2str(i)));
-                xstars_l=[xstars_l; xstar_l];
-                
-                constraints = [constraints, {xstar_l - xstar_h}];
-                lbg = [lbg; -inf];
-                ubg = [ubg; -0.001];
-                
-                gstar_h=a0_sym+a_sym*((u+xstar_h).^n_sym)./(K_sym+(u+xstar_h).^n_sym)-xstar_h;
-                constraints = [constraints, {gstar_h}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                gstar_l=a0_sym+a_sym*((u+xstar_l).^n_sym)./(K_sym+(u+xstar_l).^n_sym)-xstar_l;
-                constraints = [constraints, {gstar_l}];
-                lbg = [lbg; 0];
-                ubg = [ubg; 0];
-                
+            end
+        else
+            xstar_h = SX.sym(strcat('xstar_h_',num2str(i)));
+            xstars_h=[xstars_h; xstar_h];
+            xstar_l = SX.sym(strcat('xstar_l_',num2str(i)));
+            xstars_l=[xstars_l; xstar_l];
+
+            constraints = [constraints, {xstar_l - xstar_h}];
+            lbg = [lbg; -inf];
+            ubg = [ubg; -0.001];
+
+            gstar_h=a0_sym+a_sym*((u+xstar_h).^n_sym)./(K_sym+(u+xstar_h).^n_sym)-xstar_h;
+            constraints = [constraints, {gstar_h}];
+            lbg = [lbg; 0];
+            ubg = [ubg; 0];
+            gstar_l=a0_sym+a_sym*((u+xstar_l).^n_sym)./(K_sym+(u+xstar_l).^n_sym)-xstar_l;
+            constraints = [constraints, {gstar_l}];
+            lbg = [lbg; 0];
+            ubg = [ubg; 0];
+            for j = 1:size(xVals,1)
                 logLik_tot = logLik_tot + logLik_func(xVals(j,i),xstar_l,xstar_h,u,par_sym,Omega);
             end
         end
@@ -178,7 +136,9 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     x0starM=[];
     for i=1:length(uVals)
         [lpt,~,hpt] = fixed_point_v4(uVals(i),theta);
-        if lpt==hpt
+        if uVals(i)<uLow
+            x0starM=[x0starM;lpt];
+        elseif uVals(i)>uHigh
             x0starM=[x0starM;hpt];
         else
             x0starH=[x0starH;hpt];
@@ -188,7 +148,7 @@ function min = computeLikelihood_v3(xVals, uVals, params)
     disp(x0starH);
     disp(x0starL);
     disp(x0starM);
-    x0=[x0starM;x0starH;x0starL;transpose(theta)];
+    x0=[x0starM;x0starH;x0starL;transpose(params)];
     
     %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});
     nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', vertcat(constraints{:}));
