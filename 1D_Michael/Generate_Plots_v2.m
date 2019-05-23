@@ -38,11 +38,11 @@ disp(num2cell(xhist,1));
 
 %optimize
 
-objective = @(theta) -computeLikelihood_v2(xhist,u,theta);
-options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3, 'ObjectiveLimit', 0.9e8);
-min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
-option2 = optimset('Display','iter');
-min = fminsearch(objective, min,option2)
+% objective = @(theta) -computeLikelihood_v2(xhist,u,theta);
+% options = optimoptions('particleswarm','Display','iter','SwarmSize',200,'FunctionTolerance',1e-3, 'ObjectiveLimit', 0.9e8);
+% min = particleswarm(objective,4,[0.001 0.001 1 1],[1 5 10 4],options);
+% option2 = optimset('Display','iter');
+% min = fminsearch(objective, min,option2)
 
 % options = optimset('Display','iter');
 % min = fminsearch(objective,[0.5,3,9,3],options);
@@ -69,6 +69,8 @@ min = fminsearch(objective, min,option2)
 % nlp = struct('x',par_sym, 'f',objective, 'g', constraint);
 % min = nlpsol('min','ipopt',nlp);
 % disp(min);
+
+computeLikelihood_v3(xhist,u,theta_t);
 
 %Plotting
 u_vec = linspace(0,0.3,200);
