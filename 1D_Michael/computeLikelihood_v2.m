@@ -1,6 +1,6 @@
-function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)    
+function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)
     uLow = 0.11; uHigh=0.19;
-    
+
     a0= theta(1);
     a = theta(2);
     K = theta(3);
@@ -23,7 +23,7 @@ function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)
             return
         end
     end
-    
+
     if exist('sigma','var')
         format long;
         likelihood = 0;
@@ -31,16 +31,17 @@ function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)
             u = uVals(i);
             [lpt,~,hpt]=fixed_point_v4(u,theta);
             temp=0;
+            
             if(sigma(1,i)~=0)&&(sigma(2,i)==0)
                 temp=sum(log(...
-                normpdf(xVals(:,i),lpt,sigma(1,i)) ));
+                    normpdf(xVals(:,i),lpt,sigma(1,i)) ));
                 likelihood = likelihood +temp;
             elseif (sigma(1,i)~=0)&&(sigma(2,i)~=0)
-    %             disp([sigma(1,i) sigma(2,i)]);
-    %             disp([lpt hpt]);
+                %disp([sigma(1,i) sigma(2,i)]);
+                %disp([lpt hpt]);
                 temp=(1-rho(u))*normpdf(xVals(:,i),lpt,sigma(1,i))+...
-                rho(u)*normpdf(xVals(:,i),hpt,sigma(2,i)) ;
-    %             disp([normpd(xVals(:,i),lpt,sigma(1,i)) normpd(xVals(:,i),hpt,sigma(2,i)) xVals(:,i)]);
+                    rho(u)*normpdf(xVals(:,i),hpt,sigma(2,i)) ;
+                %disp([normpd(xVals(:,i),lpt,sigma(1,i)) normpd(xVals(:,i),hpt,sigma(2,i)) xVals(:,i)]);
                 for j = 1:length(xVals(:,i))
                     if temp(j)~=0
                         likelihood=likelihood+log(temp(j));
@@ -48,33 +49,34 @@ function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)
                 end
             elseif(sigma(2,i)~=0)&&(sigma(1,i)==0)
                 temp=sum(log(...
-                normpdf(xVals(:,i),hpt,sigma(2,i)) ));
+                    normpdf(xVals(:,i),hpt,sigma(2,i)) ));
                 likelihood = likelihood +temp;
             else
                 likelihood=-1e9;
             end
 
-        end   
+        end
         if likelihood==inf
-           likelihood = -1e8; 
+            likelihood = -1e8;
         end
         loglikelihood = likelihood;
     else
         format long;
         likelihood = 0;
+
         for i=1:length(uVals)
             u = uVals(i);
             [lpt,~,hpt]=fixed_point_v4(u,theta);
             if u < uLow
                 sigmalow=(a0+a*((u+lpt)^n)/(K+(u+lpt)^n)+lpt)/sqrt(Omega);
                 temp=sum(log(...
-                normpdf(xVals(:,i),lpt,sigmalow) ));
+                    normpdf(xVals(:,i),lpt,sigmalow) ));
                 likelihood = likelihood +temp;
             elseif uLow <= u && u <= uHigh
                 sigmalow=(a0+a*((u+lpt)^n)/(K+(u+lpt)^n)+lpt)/sqrt(Omega);
                 sigmahigh=(a0+a*((u+hpt)^n)/(K+(u+hpt)^n)+hpt)/sqrt(Omega);
                 temp=(1-rho(u))*normpdf(xVals(:,i),lpt,sigmalow)+...
-                rho(u)*normpdf(xVals(:,i),hpt,sigmahigh) ;
+                    rho(u)*normpdf(xVals(:,i),hpt,sigmahigh) ;
                 for j = 1:length(xVals(:,i))
                     if temp(j)~=0
                         likelihood=likelihood+log(temp(j));
@@ -83,18 +85,18 @@ function loglikelihood = computeLikelihood_v2(xVals, uVals, theta,sigma)
             elseif uHigh < u
                 sigmahigh=(a0+a*((u+hpt)^n)/(K+(u+hpt)^n)+hpt)/sqrt(Omega);
                 temp=sum(log(...
-                normpdf(xVals(:,i),hpt,sigmahigh) ));
+                    normpdf(xVals(:,i),hpt,sigmahigh) ));
                 likelihood = likelihood +temp;
             else
                 likelihood=-1e9;
             end
 
-        end   
+        end
         if likelihood==inf
-           likelihood = -1e8; 
+            likelihood = -1e8;
         end
         loglikelihood = likelihood;
-        
+
     end
 end
 

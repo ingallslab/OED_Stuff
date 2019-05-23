@@ -11,11 +11,11 @@ function estimate = expectationMaximization(xVals,uVals,theta_i)
         R=[];%responsibility matrix
         for n=1:numComponents
             for j=1:size(xVals,2)
-                
+
             end
         end
-            
 
-    end   
+
+    end
     loglikelihood = likelihood;
 end

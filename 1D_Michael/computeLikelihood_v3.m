@@ -38,38 +38,38 @@ function likelihood = computeLikelihood_v3(xVals, uVals, params)
     x_sym = SX.sym('x_sym');
     u_sym = SX.sym('u_sym');
     Omega_sym = SX.sym('Omega_sym');
-
+    
     a0_sym = SX.sym('a0_sym');
     a_sym = SX.sym('a_sym');
     K_sym = SX.sym('K_sym');
     n_sym = SX.sym('n_sym');
-
+    
     theta_sym=[a0_sym a_sym K_sym n_sym];
     c0_sym = SX.sym('c0_sym');
     c1_sym = SX.sym('c1_sym');
     c_sym=[c0_sym c1_sym];
     par_sym=[theta_sym c_sym];
-
+    
     g=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
     g_x=jacobian(g,x_sym);
-
+    
     sigma2=(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
     pi0=1/(1+exp(-(c0_sym+c1_sym*u_sym)));
     
     x_obs_sym = SX.sym('x_obs_sym');
     phi=(1/(sqrt(2*pi*sigma2)))*exp((-(x_obs_sym-x_sym).^2)./(2*sigma2));
     phi_func = Function('phi_func', {x_obs_sym,x_sym,u_sym,theta_sym,Omega_sym}, {phi});
-
+    
     x_low_sym = SX.sym('x_low_sym');
     x_high_sym = SX.sym('x_high_sym');
-
+    
     Lik=(1-pi0)*phi_func(x_obs_sym,x_low_sym,u_sym,theta_sym,Omega_sym)+pi0*phi_func(x_obs_sym,x_high_sym,u_sym,theta_sym,Omega_sym);
-   
+    
     logLik=log(Lik);
     logLik_func = Function('logLik_func', {x_obs_sym,x_low_sym,x_high_sym,u_sym,par_sym,Omega_sym}, {logLik});
     
     logLik_tot = 0;
-   
+    
     xstars = []; %mean x values
     constraints=[]; %nonlinear constraint functions
     lbg = []; %nonlinear constraint bounds lower
@@ -78,21 +78,24 @@ function likelihood = computeLikelihood_v3(xVals, uVals, params)
     ubw = []; %linear upper bounds
     
     for i =1:length(uVals)
-       u = uVals(i);
-       xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-       xstars=[xstars xstars_i];
-       constraints = [constraints {g}];
-       lbg = [lbg; 0; 0];
-       ubg = [ubg; 0; 0];
-       for j = 1:size(xVals,1)
-           if u<uLow              
-               logLik_tot = logLik_tot + phi_func(xVals(j,i),xstar_i,u,par_sym,Omega_sym);
-           elseif u>uHigh
-               logLik_tot = logLik_tot + phi_func(xVals(j,i),xstar_i,u,par_sym,Omega_sym);
-           else
-
-           end
-       end
+        u = uVals(i);
+        
+        constraints = [constraints {g}];
+        lbg = [lbg; 0; 0];
+        ubg = [ubg; 0; 0];
+        for j = 1:size(xVals,1)
+            if u<uLow
+                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
+                xstars=[xstars xstars_i];
+                logLik_tot = logLik_tot + phi_func(xVals(j,i),xstar_i,u,par_sym,Omega_sym);
+            elseif u>uHigh
+                xstar_i = SX.sym(strcat('xstar_',num2str(i)));
+                xstars=[xstars xstars_i];
+                logLik_tot = logLik_tot + phi_func(xVals(j,i),xstar_i,u,par_sym,Omega_sym);
+            else
+                
+            end
+        end
     end
     
     logLikelihood = Function('logLikelihood', {xstars,par_sym,Omega_sym},{logLik_tot});
