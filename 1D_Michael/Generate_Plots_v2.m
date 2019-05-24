@@ -15,7 +15,7 @@ xhist=[];
 uTot_new=0;
 u_new=[];
 hold on
-for i=1:10:totU
+for i=1:5:totU
     tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
     tmp = tmp(1:500:length(tmp));
     sz=size(tmp);
@@ -70,7 +70,7 @@ disp(num2cell(xhist,1));
 % min = nlpsol('min','ipopt',nlp);
 % disp(min);
 
-min=casadiOptimize(xhist,u,[theta_t 15 100]);
+min=casadiOptimize(xhist,u, [0.1 0.001 1 1],[1 5 10 4],100);
 %Plotting
 u_vec = linspace(0,0.3,200);
 hold on

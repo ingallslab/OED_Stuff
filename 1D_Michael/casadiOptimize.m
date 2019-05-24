@@ -1,20 +1,54 @@
-function min = casadiOptimize(xVals, uVals, params)
+function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
-    close all
+    close all     
+    xvals = vertcat(xVals(:));
+    if ~exist('syms','var')
+        syms = generateOptimSymbols(xVals,uVals);
+    end
+    lF = Function('lF',{syms.optimVars,syms.fixedparams},{syms.logLik_tot});
     
-    Omega = 90;
-    uLow = 0.1;
-    uHigh = 0.2;
+    disp('symbolic expressions generated, now performing multistart analysis');
+    
+    flag = 0;
+    diffe = ub-lb;
+    x0 = [];
+    while flag == 0
+        r = [diffe(1)*rand(SwarmSize,1)+lb(1) diffe(2)*rand(SwarmSize,1)+lb(2) diffe(3)*rand(SwarmSize,1)+lb(3) diffe(4)*rand(SwarmSize,1)+lb(4)];
 
+        tests =[];
+        for i = 1:SwarmSize
+            tm = generateOptimVars([r(i,:) -15 100],uVals);
+            if tm ~=0
+               tests = [tests tm]; 
+            end
+        end
+        
+        for i = 1:size(tests,2)
+            if full(lF(tests(:,i),xvals)) < inf
+                flag = 1;
+                x0 = tests(:,i);
+                break
+            end
+        end
+    end
+    disp(transpose(x0(end-5:end-2)));
+    disp('multistart analysis complete');
+    %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});
+
+    solution = syms.solver('x0',x0,'lbg',syms.lbg,'ubg',syms.ubg,'p',xvals);
+    min = full(solution.x(end-5:end-2));
+    
+    disp(min);
+end
+
+
+function o = generateOptimVars(params,uVals)
+    Bounds = [0.1,0.2];
     a0= params(1);
     a = params(2);
     K = params(3);
     n = params(4);
-    theta = [a0 a K n];
-    
-    Bounds = [0.1,0.2];
-    
     tol=1e-4;
     g_bnd1_cnt=0;
     maxU=5;
@@ -31,109 +65,17 @@ function min = casadiOptimize(xVals, uVals, params)
         maxU=maxU+1;
     end
     if (g_bnd1_cnt<3)||(g_bnd2_cnt<3)
+        o=0;
         return
     end
     
-    
-    x_sym = SX.sym('x_sym');
-    u_sym = SX.sym('u_sym');
-    Omega_sym = SX.sym('Omega_sym');
-    
-    a0_sym = SX.sym('a0_sym');
-    a_sym = SX.sym('a_sym');
-    K_sym = SX.sym('K_sym');
-    n_sym = SX.sym('n_sym');
-    
-    theta_sym=[a0_sym a_sym K_sym n_sym];
-    c0_sym = SX.sym('c0_sym');
-    c1_sym = SX.sym('c1_sym');
-    c_sym=[c0_sym c1_sym];
-    par_sym=[theta_sym c_sym];
-    
-    g=a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)-x_sym;
-    g_x=jacobian(g,x_sym);
-    
-    sigma2=-(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
-    pi0=1/(1+exp(-(c0_sym+c1_sym*u_sym)));
-    
-    x_obs_sym = SX.sym('x_obs_sym');
-    phi=(1/(sqrt(2*pi*sigma2)))*exp((-(x_obs_sym-x_sym).^2)./(2*sigma2));
-    phi_func = Function('phi_func', {x_obs_sym,x_sym,u_sym,theta_sym,Omega_sym}, {phi});
-    
-    x_low_sym = SX.sym('x_low_sym');
-    x_high_sym = SX.sym('x_high_sym');
-    
-    Lik=(1-pi0)*phi_func(x_obs_sym,x_low_sym,u_sym,theta_sym,Omega_sym)+pi0*phi_func(x_obs_sym,x_high_sym,u_sym,theta_sym,Omega_sym);
-    
-    logLik=log(Lik);
-    logLik_func = Function('logLik_func', {x_obs_sym,x_low_sym,x_high_sym,u_sym,par_sym,Omega_sym}, {logLik});
-    
-    logLik_tot = 0;
-    
-    xstars_m = []; %mean x values -> monostable region
-    constraints=[]; %nonlinear constraint functions
-    lbg = []; %nonlinear constraint bounds lower
-    ubg = []; %nonlinear constraint bounds upper
-    lbw = []; %linear lower bounds
-    ubw = []; %linear upper bounds
-    
-    xstars_h =[]; %mean x values -> upper branch, bistable region
-    xstars_l =[]; %mean x values -> lower branch, bistable region
-    disp('setting up symbolic expression');
-    for i =1:length(uVals)
-        u = uVals(i);
-        
-        if u<uLow
-            xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-            xstars_m=[xstars_m; xstar_i];
 
-            gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-            constraints = [constraints, {gstar}];
-            lbg = [lbg; 0];
-            ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            end
-        elseif u>uHigh
-            xstar_i = SX.sym(strcat('xstar_',num2str(i)));
-            xstars_m=[xstars_m; xstar_i];
-
-            gstar=a0_sym+a_sym*((u+xstar_i).^n_sym)./(K_sym+(u+xstar_i).^n_sym)-xstar_i;
-            constraints = [constraints, {gstar}];
-            lbg = [lbg; 0];
-            ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + log(phi_func(xVals(j,i),xstar_i,u,theta_sym,Omega));
-            end
-        else
-            xstar_h = SX.sym(strcat('xstar_h_',num2str(i)));
-            xstars_h=[xstars_h; xstar_h];
-            xstar_l = SX.sym(strcat('xstar_l_',num2str(i)));
-            xstars_l=[xstars_l; xstar_l];
-
-            constraints = [constraints, {xstar_l - xstar_h}];
-            lbg = [lbg; -inf];
-            ubg = [ubg; -0.001];
-
-            gstar_h=a0_sym+a_sym*((u+xstar_h).^n_sym)./(K_sym+(u+xstar_h).^n_sym)-xstar_h;
-            constraints = [constraints, {gstar_h}];
-            lbg = [lbg; 0];
-            ubg = [ubg; 0];
-            gstar_l=a0_sym+a_sym*((u+xstar_l).^n_sym)./(K_sym+(u+xstar_l).^n_sym)-xstar_l;
-            constraints = [constraints, {gstar_l}];
-            lbg = [lbg; 0];
-            ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + logLik_func(xVals(j,i),xstar_l,xstar_h,u,par_sym,Omega);
-            end
-        end
-    end
-    optimVars = [xstars_m; xstars_h; xstars_l; transpose(par_sym)];
-    disp(logLik_tot);
-    
     x0starH=[];
     x0starL=[];
     x0starM=[];
+    uLow = 0.1;
+    uHigh = 0.2;
+    theta = params([1,2,3,4]);
     for i=1:length(uVals)
         [lpt,~,hpt] = fixed_point_v4(uVals(i),theta);
         if uVals(i)<uLow
@@ -146,15 +88,6 @@ function min = casadiOptimize(xVals, uVals, params)
         end
     end
 
-    x0=[x0starM;x0starH;x0starL;transpose(params)];
-    
-    %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});
-    nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', vertcat(constraints{:}));
-    solver = nlpsol('solver','ipopt',nlp);
-    disp('solver has generated, beginning optimization');
-    disp(solver);
-    solution = solver('x0',x0,'lbg',lbg,'ubg',ubg);
-    min = full(solution.x(end-5:end-2));
-    disp(min);
+    o=[x0starM;x0starH;x0starL;transpose(params)];
 end
 
