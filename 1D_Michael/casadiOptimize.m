@@ -23,9 +23,11 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
                tests = [tests tm]; 
             end
         end
-        
+        s =[];
         for i = 1:size(tests,2)
-            if full(lF(tests(:,i),xvals)) < inf
+            a = full(lF(tests(:,i),xvals));
+            if a < 1e5
+                disp(a);
                 flag = 1;
                 x0 = tests(:,i);
                 break
@@ -36,9 +38,16 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
     disp('multistart analysis complete');
     %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});
 
-    solution = syms.solver('x0',x0,'lbg',syms.lbg,'ubg',syms.ubg,'p',xvals);
-    min = full(solution.x(end-5:end-2));
-    
+
+    try
+        solution = syms.solver('x0',x0,'lbg',syms.lbg,'ubg',syms.ubg,'p',xvals);
+        min = full(solution.x(end-5:end-2));
+    catch error
+        disp(error.identifier);
+        if strcmp(error.identifier, 'SWIG:RuntimeError')
+           min = NaN; 
+        end
+    end
     disp(min);
 end
 

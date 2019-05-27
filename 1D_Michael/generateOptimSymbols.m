@@ -112,7 +112,8 @@ function sym = generateOptimSymbols(xVals,uVals)
     p = vertcat(xvals{:});
     optimVars = [xstars_m; xstars_h; xstars_l; transpose(par_sym)];
     nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', cons, 'p', p);
-    solver = nlpsol('solver','ipopt',nlp);
+    options.error_on_fail = true;
+    solver = nlpsol('solver','ipopt',nlp,options);
     disp('solver has generated, beginning optimization');
     sym = struct('optimVars',optimVars, 'logLik_tot',-logLik_tot,'lbg',lbg,'ubg',ubg,'solver',solver,'fixedparams',p);
 end

@@ -9,31 +9,31 @@ n = 3;
 
 theta_t = [a0,a,K,n];
 
-u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
-totU=length(u);
-xhist=[];
-uTot_new=0;
-u_new=[];
-hold on
-for i=1:5:totU
-    tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
-    tmp = tmp(1:500:length(tmp));
-    sz=size(tmp);
-    if i==1||sz(1)==sz_hst(1)
-        xhist = [xhist tmp];
-        sz_hst = size(xhist);
-        uTot_new = uTot_new+1;
-        u_new=[u_new u(i)];
-    else
-        test=0;
-    end
-    scatter(u(i)*ones(size(tmp)),tmp);
-end
-hold off
-totU=uTot_new;
-u=u_new;
-disp('xhist loaded');
-disp(num2cell(xhist,1));
+% u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+% totU=length(u);
+% xhist=[];
+% uTot_new=0;
+% u_new=[];
+% hold on
+% for i=1:5:totU
+%     tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
+%     tmp = tmp(1:500:length(tmp));
+%     sz=size(tmp);
+%     if i==1||sz(1)==sz_hst(1)
+%         xhist = [xhist tmp];
+%         sz_hst = size(xhist);
+%         uTot_new = uTot_new+1;
+%         u_new=[u_new u(i)];
+%     else
+%         test=0;
+%     end
+%     scatter(u(i)*ones(size(tmp)),tmp);
+% end
+% hold off
+% totU=uTot_new;
+% u=u_new;
+% disp('xhist loaded');
+% disp(num2cell(xhist,1));
 %disp(computeLikelihood_v3(xhist,u,[0.5,3,9,3,15,100]));
 
 %optimize
@@ -70,12 +70,12 @@ disp(num2cell(xhist,1));
 % min = nlpsol('min','ipopt',nlp);
 % disp(min);
 
-min=casadiOptimize(xhist,u, [0.1 0.001 1 1],[1 5 10 4],100);
+% min=casadiOptimize(xhist,u, [0.1 0.001 1 1],[1 5 10 4],100);
 %Plotting
 u_vec = linspace(0,0.3,200);
 hold on
 plotbif(u_vec,theta_t);
-plotbif(u_vec,min,'black');
+plotbif(u_vec,[0.1928    3.0908    7.6246    3.5973],'black');
 hold off
 
 %%
