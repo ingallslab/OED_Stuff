@@ -53,8 +53,10 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
             u=u_new;
             disp('xValues loaded, generating symbolic expressions');
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
+            lb = [0.1 0.001 1 1];
+            ub = [1 5 10 4];
             for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,[0.1 0.001 1 1],[1 5 10 4],100,syms));
+                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
                 if ~isnan(min)
                     thetas = [thetas; min];
                 end
@@ -72,32 +74,39 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
                 flag = 0;
                 if flag==0&&lpt==hpt
                     for j=1:numFits 
-                        sigma=sigma_func(theta_t,Omega,u(i),lpt);
-                        xVals{i,j}=normrnd(xl,sigma,[numTrials,1]);   
+                        sigma=full(sigma_func(theta_t,Omega,u(i),lpt));
+                        xVals{i,j}=normrnd(lpt,sigma,[numTrials,1]);   
                     end
-                end
                 elseif flag==1&&lpt==hpt
                     for j=1:numFits 
-                        sigma=sigma_func(theta_t,Omega,u(i),hpt);
+                        sigma=full(sigma_func(theta_t,Omega,u(i),hpt));
                         xVals{i,j}=normrnd(hpt,sigma,[numTrials,1]);   
                     end
                 else
                     flag=1;
                     for j=1:numFits 
-                        sigmah=sigma_func(theta_t,Omega,u(i),hpt);
-                        sigmal=sigma_func(theta_t,Omega,u(i),lpt);
-                        numHigh = round(pi0_func([-18.1,111.7],u(i))*numTrials);
+                        sigmah=full(sigma_func(theta_t,Omega,u(i),hpt));
+                        sigmal=full(sigma_func(theta_t,Omega,u(i),lpt));
+                        numHigh = round(full(pi0_func([-18.1,111.7],u(i)))*numTrials);
                         numLow = numTrials-numHigh;
                         xVals{i,j}=[normrnd(hpt,sigmah,[numHigh,1]); normrnd(lpt,sigmal,[numLow,1])];
                     end
+                end
             end
 
             
             disp('xValues loaded, generating symbolic expressions');
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
+            lb = [0.1 0.001 1 1];
+            ub = [1 5 10 4];
+            
             for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,[0.1 0.001 1 1],[1 5 10 4],100,syms));
+                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
+                flag = true
+                if lb(1)<min(1)&&ub(1)>min(1)
+                
                 if ~isnan(min)
+                    
                     thetas = [thetas; min];
                 end
             end

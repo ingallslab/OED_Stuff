@@ -53,8 +53,10 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
             u=u_new;
             disp('xValues loaded, generating symbolic expressions');
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
+            lb = [0.1 0.001 1 1];
+            ub = [1 5 10 4];
             for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,[0.1 0.001 1 1],[1 5 10 4],100,syms));
+                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
                 if ~isnan(min)
                     thetas = [thetas; min];
                 end
@@ -95,9 +97,19 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
             
             disp('xValues loaded, generating symbolic expressions');
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
+            lb = [0.1 0.001 1 1];
+            ub = [1 5 10 4];
+            
             for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,[0.1 0.001 1 1],[1 5 10 4],100,syms));
-                if ~isnan(min)
+                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
+                flag = 1;
+                for k=1:4
+                    if ~(lb(k)<min(k)&&ub(k)>min(k))
+                        flag=0;
+                        break
+                    end
+                end
+                if (~isnan(min))&(flag==1)
                     thetas = [thetas; min];
                 end
             end

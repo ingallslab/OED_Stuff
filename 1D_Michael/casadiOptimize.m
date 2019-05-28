@@ -23,16 +23,20 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
                tests = [tests tm]; 
             end
         end
-        s =[];
-        for i = 1:size(tests,2)
-            a = full(lF(tests(:,i),xvals));
-            if a < 1e5
-                disp(a);
-                flag = 1;
-                x0 = tests(:,i);
-                break
+        if size(tests(:,1))~=0
+            a_old = full(lF(tests(:,1),xvals));
+            for i = 1:size(tests,2)
+                a=full(lF(tests(:,i),xvals));
+                index=1;
+                if a < a_old && a_old < inf
+                    a_old = a;
+                    index = i;
+                    flag = 1;
+                end
+                x0 = tests(:,index);
             end
         end
+        
     end
     disp(transpose(x0(end-5:end-2)));
     disp('multistart analysis complete');
