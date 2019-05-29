@@ -55,11 +55,21 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
             lb = [0.1 0.001 1 1];
             ub = [1 5 10 4];
-            for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
-                if ~isnan(min)
-                    thetas = [thetas; min];
+            while numFits > 0
+                for i=1:numFits         
+                    min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
+                    flag=1;
+                    for k=1:4
+                        if ~(lb(k)<min(k)&&ub(k)>min(k))
+                            flag=0;
+                            break
+                        end
+                    end
+                    if (~isnan(min))&(flag==1)
+                        thetas = [thetas; min];
+                    end
                 end
+                numFits = numFits - size(thetas,1);
             end
         end
     end
@@ -99,19 +109,21 @@ function thetas=generateFits(numFits, numExp, numTrials, options)
             syms = generateOptimSymbols(horzcat(xVals{:,1}),u);
             lb = [0.1 0.001 1 1];
             ub = [1 5 10 4];
-            
-            for i=1:numFits
-                min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,100,syms));
-                flag = 1;
-                for k=1:4
-                    if ~(lb(k)<min(k)&&ub(k)>min(k))
-                        flag=0;
-                        break
+            while numFits > 0
+                for i=1:numFits
+                    min = transpose(casadiOptimize(horzcat(xVals{:,i}),u,lb,ub,500,syms));
+                    flag = 1;
+                    for k=1:4
+                        if ~(lb(k)<min(k)&&ub(k)>min(k))
+                            flag=0;
+                            break
+                        end
+                    end
+                    if (~isnan(min))&(flag==1)
+                        thetas = [thetas; min];
                     end
                 end
-                if (~isnan(min))&(flag==1)
-                    thetas = [thetas; min];
-                end
+                numFits = numFits - size(thetas,1);
             end
         end
     end

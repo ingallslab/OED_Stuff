@@ -1,4 +1,4 @@
-function Yend=SSA_Generator_1D(initX,u,OMEGA,finTime,num)
+function Yend=SSA_Compute_1D(initX,u,OMEGA,finTime,num)
     %initX = initial points
     %u_vals = inputs to simulate
     %OMEGA = system size
