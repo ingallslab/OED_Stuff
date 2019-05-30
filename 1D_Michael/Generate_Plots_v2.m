@@ -10,30 +10,34 @@ n = 3;
 theta_t = [a0,a,K,n];
 
 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
-totU=length(u);
-xhist=[];
-uTot_new=0;
-u_new=[];
 hold on
-for i=1:5:totU
-    tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
-    tmp = tmp(1:500:length(tmp));
-    sz=size(tmp);
-    if i==1||sz(1)==sz_hst(1)
-        xhist = [xhist tmp];
-        sz_hst = size(xhist);
-        uTot_new = uTot_new+1;
-        u_new=[u_new u(i)];
-    else
-        test=0;
-    end
-    scatter(u(i)*ones(size(tmp)),tmp);
-end
+plotbif(u,[0.5,3,9,3]);
+plotbif(u,[0.276388 3.52145 3.87709 3.54241]);
 hold off
-totU=uTot_new;
-u=u_new;
-disp('xhist loaded');
-disp(num2cell(xhist,1));
+% totU=length(u);
+% xhist=[];
+% uTot_new=0;
+% u_new=[];
+% hold on
+% for i=1:5:totU
+%     tmp = load(strcat('drive_W90/hist_W=90.000000_u=',num2str(u(i),'%1.6f'),'.txt'));
+%     tmp = tmp(1:500:length(tmp));
+%     sz=size(tmp);
+%     if i==1||sz(1)==sz_hst(1)
+%         xhist = [xhist tmp];
+%         sz_hst = size(xhist);
+%         uTot_new = uTot_new+1;
+%         u_new=[u_new u(i)];
+%     else
+%         test=0;
+%     end
+%     scatter(u(i)*ones(size(tmp)),tmp);
+% end
+% hold off
+% totU=uTot_new;
+% u=u_new;
+% disp('xhist loaded');
+% disp(num2cell(xhist,1));
 
 %optimize
 

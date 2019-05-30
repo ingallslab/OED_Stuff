@@ -1,8 +1,8 @@
-function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
+function min = casadiOptimize(horzcat(xVals{:,i}), uVals, lb, ub, SwarmSize, syms)
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all     
-    xvals = vertcat(xVals{:});
+    xvals = vertcat(xVals(:));
     if ~exist('syms','var')
         syms = generateOptimSymbols(xVals,uVals);
     end
@@ -22,9 +22,9 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
             end
         end
         if ~isempty(tests(:,1))&&(size(tests,1)~=0)
-            a_old = full(lF(tests(:,1),xvals(:)));
+            a_old = full(lF(tests(:,1),xvals));
             for i = 1:size(tests,2)
-                a=full(lF(tests(:,i),xvals(:)));
+                a=full(lF(tests(:,i),xvals));
                 index=1;
                 if a < a_old && a_old < inf
                     index = i;
@@ -40,9 +40,7 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
     %logLikelihood = Function('logLikelihood', {optimVars,Omega_sym},{logLik_tot});      
     err='';
     try
-        syms.solver.stats();
-        solution = syms.solver('x0',x0(:,1),'lbg',syms.lbg,'ubg',syms.ubg,'p',xvals(:));
-        
+        solution = syms.solver('x0',x0(:,1),'lbg',syms.lbg,'ubg',syms.ubg,'p',xvals);
         min = full(solution.x(end-5:end-2,1));
     catch error
         disp(error.identifier);

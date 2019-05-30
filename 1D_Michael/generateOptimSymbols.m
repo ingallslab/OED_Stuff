@@ -1,4 +1,7 @@
 function sym = generateOptimSymbols(xVals,uVals)
+    
+    
+    
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all
@@ -41,11 +44,11 @@ function sym = generateOptimSymbols(xVals,uVals)
     
     logLik_tot = 0;
     
-    xvals = cell(size(xVals,1),size(xVals,2));
-    for i=1:size(xVals,1)
-        for j=1:size(xVals,2)
-            x_symij = SX.sym(strcat('xvals_',num2str(i),num2str(j)));
-            xvals{i,j}=x_symij;
+    xvals = cell(size(xVals,2),1);
+    for i=1:size(xVals,2)
+        for j=1:length(xVals{1,i})
+            x_symij = SX.sym(strcat('xvals_',num2str(i),'_',num2str(j)));
+            xvals{i}=[xvals{i}; x_symij];
         end
     end
     
@@ -71,8 +74,8 @@ function sym = generateOptimSymbols(xVals,uVals)
             constraints = [constraints, {gstar}];
             lbg = [lbg; 0];
             ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + log(phi_func(xvals{j,i},xstar_i,u,theta_sym,Omega));
+            for j = 1:length(xvals{i})
+                logLik_tot = logLik_tot + log(phi_func(xvals{i}(j),xstar_i,u,theta_sym,Omega));
             end
         elseif u>uHigh
             xstar_i = SX.sym(strcat('xstar_',num2str(i)));
@@ -82,8 +85,8 @@ function sym = generateOptimSymbols(xVals,uVals)
             constraints = [constraints, {gstar}];
             lbg = [lbg; 0];
             ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + log(phi_func(xvals{j,i},xstar_i,u,theta_sym,Omega));
+            for j = 1:length(xvals{i})
+                logLik_tot = logLik_tot + log(phi_func(xvals{i}(j),xstar_i,u,theta_sym,Omega));
             end
         else
             xstar_h = SX.sym(strcat('xstar_h_',num2str(i)));
@@ -103,8 +106,8 @@ function sym = generateOptimSymbols(xVals,uVals)
             constraints = [constraints, {gstar_l}];
             lbg = [lbg; 0];
             ubg = [ubg; 0];
-            for j = 1:size(xVals,1)
-                logLik_tot = logLik_tot + logLik_func(xvals{j,i},xstar_l,xstar_h,u,par_sym,Omega);
+            for j = 1:length(xvals{i})
+                logLik_tot = logLik_tot + logLik_func(xvals{i}(j),xstar_l,xstar_h,u,par_sym,Omega);
             end
         end
     end
@@ -113,7 +116,9 @@ function sym = generateOptimSymbols(xVals,uVals)
     optimVars = [xstars_m; xstars_h; xstars_l; transpose(par_sym)];
     nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', cons, 'p', p);
     options.error_on_fail = true;
-    options.ipopt.max_iter = 40;
+    options.ipopt.max_iter = 200;
+    options.ipopt.fixed_variable_treatment='make_constraint';
+%     options.monitor = {'nlp_f','nlp_g'};
     solver = nlpsol('solver','ipopt',nlp,options);
     disp('solver has generated, beginning optimization');
     sym = struct('optimVars',optimVars, 'logLik_tot',-logLik_tot,'lbg',lbg,'ubg',ubg,'solver',solver,'fixedparams',p);
