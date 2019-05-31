@@ -13,7 +13,6 @@ SSA_L = dlmread('200x20__SSA_LinSpace_90.txt','\t');
 % scatterEData(SSA_L,6);
 
 h=figure(7);
-set(h,'Position', [10 10 900 900]);
 sz=25;
 subplots=[];
 ndm=[];
@@ -32,15 +31,7 @@ for i=1:4
     slm=[slm mean(SSA_L(:,i))];
 end
 
-theta_t = [0.5,3,9,3];
-disp(norm(ndm-theta_t));
-disp(norm(ndsm-theta_t));
-disp(norm(nlm-theta_t));
-disp(norm(sdm-theta_t));
-disp(norm(sdsm-theta_t));
-disp(norm(slm-theta_t));
-
-subplots=[subplots subplot(3,3,1)];
+subplots=[subplots subplot(2,3,1)];
 hold on
 
 plotErrorEllipse(subplots(1),ndm([1,2]),cov([Norm_D(:,1) Norm_D(:,2)]),[0, 255, 25]/255);
@@ -69,7 +60,7 @@ hold off
 
 
 
-subplots=[subplots subplot(3,3,2)];
+subplots=[subplots subplot(2,3,2)];
 hold on
 
 plotErrorEllipse(subplots(2),ndm([1,3]),cov([Norm_D(:,1) Norm_D(:,3)]),[0, 255, 25]/255);
@@ -96,7 +87,7 @@ title(subplots(2),'K versus \alpha_0');
 xlabel(subplots(2),'\alpha_0'); ylabel(subplots(2),'K');
 hold off
 
-subplots=[subplots subplot(3,3,3)];
+subplots=[subplots subplot(2,3,3)];
 hold on
 
 plotErrorEllipse(subplots(3),ndm([1,4]),cov([Norm_D(:,1) Norm_D(:,4)]),[0, 255, 25]/255);
@@ -123,7 +114,7 @@ title(subplots(3),'n versus \alpha_0');
 xlabel(subplots(3),'\alpha_0'); ylabel(subplots(3),'n');
 hold off
 
-subplots=[subplots subplot(3,3,4)];
+subplots=[subplots subplot(2,3,4)];
 hold on
 
 plotErrorEllipse(subplots(4),ndm([2,3]),cov([Norm_D(:,2) Norm_D(:,3)]),[0, 255, 25]/255);
@@ -150,7 +141,7 @@ title(subplots(4),'K versus \alpha');
 xlabel(subplots(4),'\alpha'); ylabel(subplots(4),'K');
 hold off
 
-subplots=[subplots subplot(3,3,5)];
+subplots=[subplots subplot(2,3,5)];
 hold on
 
 plotErrorEllipse(subplots(5),ndm([2,4]),cov([Norm_D(:,2) Norm_D(:,4)]),[0, 255, 25]/255);
@@ -177,7 +168,7 @@ title(subplots(5),'n versus \alpha');
 xlabel(subplots(5),'\alpha'); ylabel(subplots(5),'n');
 hold off
 
-subplots=[subplots subplot(3,3,6)];
+subplots=[subplots subplot(2,3,6)];
 hold on
 
 plotErrorEllipse(subplots(6),ndm([3,4]),cov([Norm_D(:,3) Norm_D(:,4)]),[0, 255, 25]/255,'Normal D-Optimal');
@@ -196,18 +187,14 @@ plotErrorEllipse(subplots(6),sdsm([3,4]),cov([SSA_Ds(:,3) SSA_Ds(:,4)]),[183, 0,
 scatter(subplots(6),sdsm(3),sdsm(4),25,[183, 0, 0]/255,'filled','HandleVisibility','off');
 
 plotErrorEllipse(subplots(6),slm([3,4]),cov([SSA_L(:,3) SSA_L(:,4)]),[96, 0, 0]/255,'SSA Non-OED');
-scatter(subplots(6),slm(3),slm(4),25,[96, 0, 0]/255,'filled','HandleVisibility','off');
+scatter(subplots(6),slm(3),slm(4),25,[96, 0, 0]/255,'filled''HandleVisibility','off');
 
-scatter(subplots(6),9,3,40,'blue','HandleVisibility','off');
+scatter(subplots(6),9,3,40,'blue');
 
 title(subplots(6),'n versus K');
 xlabel(subplots(6),'K'); ylabel(subplots(6),'n');
 hold off
-hleg = subplot(3,3,7);
-axis(hleg,'off');
-pleg = get(hleg,'Position');
-leg=legend(subplot(3,3,6));
-set(leg,'Position',pleg);
+legend(subplot(2,3,6));
 saveas(h,'Covariance_Plot_200x20_90.png');
 
 %%

@@ -182,7 +182,76 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     end
     if strcmp(options.DataSource,'Normal')
         if options.SystemSize == 90
-            if strcmp(options.Optimality,'Ds_Optimal')
+            if strcmp(options.Optimality,'D_Optimal')
+                u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+                inc = length(u)/numExp;
+                if inc<1
+                    disp('Too many experiments!');
+                    return
+                end 
+                u = u(1:inc:end);        
+                [u_opt,w_opt] = D_opt_c(par_true,Omega,u,FIM_comp(par_true,Omega,u,[0.1,0.2]),[0.1,0.2]);
+                numSamp=round(w_opt*numTrials*numExp);
+                
+                k=ones(1,length(u_opt));
+                for j=1:length(u_opt)
+                    [~,k(j)]=min(abs(u-u_opt(j)));
+                end
+                u_opt=u(k);
+                
+                xVals = cell(numFits,length(u_opt));
+                theta_t=[0.5,3,9,3];
+                for i=1:length(u_opt)
+                    [lpt,~,hpt]=fixed_point_v4(u_opt(i),theta_t);
+
+                    flag = 0;
+                    if flag==0&&lpt==hpt
+                        for j=1:numFits 
+                            sigma=full(sigma_func(theta_t,Omega,u_opt(i),lpt));
+                            xVals{j,round(i)}=normrnd(lpt,sigma,[numSamp(i),1]);   
+                        end
+                    elseif flag==1&&lpt==hpt
+                        for j=1:numFits 
+                            sigma=full(sigma_func(theta_t,Omega,u_opt(i),hpt));
+                            xVals{j,round(i)}=normrnd(hpt,sigma,[numSamp(i),1]);   
+                        end
+                    else
+                        flag=1;
+                        for j=1:numFits 
+                            sigmah=full(sigma_func(theta_t,Omega,u_opt(i),hpt));
+                            sigmal=full(sigma_func(theta_t,Omega,u_opt(i),lpt));
+                            numHigh = round(full(pi0_func([-18.1,111.7],u_opt(i)))*numSamp(i));
+                            numLow = numSamp(i)-numHigh;
+                            xVals{j,round(i)}=[normrnd(hpt,sigmah,[numHigh,1]); normrnd(lpt,sigmal,[numLow,1])];
+                        end
+                    end
+                end
+
+
+                disp('xValues loaded, generating symbolic expressions');
+                syms = generateOptimSymbols(xVals,u_opt);
+                lb = [0.1 0.001 1 1];
+                ub = [1 5 10 4];
+                while numFits > 0
+                    for i=1:numFits
+                        mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,500,syms));
+                        flag = 1;
+                        for k=1:4
+                            if ~(lb(k)<mini(k)&&ub(k)>mini(k))
+                                flag=0;
+                                break
+                            end
+                        end
+                        if (~isnan(mini))&(flag==1)
+                            thetas = [thetas; mini];
+                            disp(i);
+                        else
+                            numNans=numNans+1;
+                        end
+                    end
+                    numFits = numFits - size(thetas,1);
+                end
+            elseif strcmp(options.Optimality,'Ds_Optimal')
                 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
                 inc = length(u)/numExp;
                 if inc<1
@@ -250,9 +319,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                         end
                     end
                     numFits = numFits - size(thetas,1);
-                end
-                
-                
+                end    
             elseif strcmp(options.Optimality,'LinSpace')               
                 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
                 inc = length(u)/numExp;

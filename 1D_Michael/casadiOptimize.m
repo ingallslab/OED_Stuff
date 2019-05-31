@@ -21,7 +21,7 @@ function min = casadiOptimize(xVals, uVals, lb, ub, SwarmSize, syms)
                tests = [tests tm]; 
             end
         end
-        if ~isempty(tests(:,1))&&(size(tests,1)~=0)
+        if (size(tests,1)~=0)&&(size(tests,2)~=0)&&(~isempty(tests(:,1)))
             a_old = full(lF(tests(:,1),xvals(:)));
             for i = 1:size(tests,2)
                 a=full(lF(tests(:,i),xvals(:)));

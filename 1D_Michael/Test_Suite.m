@@ -13,36 +13,36 @@ opt = 'D_Optimal';  %Ds_Optimal, D_Optimal, LinSpace
 %   distributed data, which is generated based off of an OED procedure.
 
 Omega = 90;
+% 
+% optionsA = struct('DataSource','SSA','SystemSize',Omega,'Optimality','LinSpace'); 
+% [nanA,fitsA] = generateFits(numFits,numExp,numTrials,optionsA);
+% dlmwrite(strcat('./1D_Michael/Data/200x20__SSA_LinSpace_90.txt'),fitsA,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__SSA_LinSpace_90_nans.txt',nanA,'\t');
+% 
+% optionsB = struct('DataSource','SSA','SystemSize',Omega,'Optimality','Ds_Optimal'); 
+% [nanB,fitsB] = generateFits(numFits,numExp,numTrials,optionsB);
+% dlmwrite('./1D_Michael/Data/200x20__SSA_Ds_90.txt',fitsB,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__SSA_Ds_90_nans.txt',nanB,'\t');
+% 
+% optionsC = struct('DataSource','SSA','SystemSize',Omega,'Optimality','D_Optimal'); 
+% [nanC,fitsC] = generateFits(numFits,numExp,numTrials,optionsC);
+% dlmwrite('./1D_Michael/Data/200x20__SSA_D_90.txt',fitsC,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__SSA_D_90_nans.txt',nanC,'\t');
+% 
+% optionsA2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','LinSpace'); 
+% [nanA2,fitsA2] = generateFits(numFits,numExp,numTrials,optionsA2);
+% dlmwrite('./1D_Michael/Data/200x20__Normal_LinSpace_90.txt',fitsA2,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__Normal_LinSpace_90_nans.txt',nanA2,'\t');
+% 
+% optionsB2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','Ds_Optimal'); 
+% [nanB2,fitsB2] = generateFits(numFits,numExp,numTrials,optionsB2);
+% dlmwrite('./1D_Michael/Data/200x20__Normal_Ds_90.txt',fitsB2,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__Normal_Ds_90nans.txt',nanB2,'\t');
 
-optionsA = struct('DataSource','SSA','SystemSize',Omega,'Optimality','LinSpace'); 
-[nanA,fitsA] = generateFits(numFits,numExp,numTrials,optionsA);
-dlmwrite(strcat('./1D_Michael/Data/200x20__SSA_LinSpace_90.txt'),fitsA,'\t');
-dlmwrite('./1D_Michael/Data/200x20__SSA_LinSpace_90_nans.txt',nanA,'\t');
-
-optionsB = struct('DataSource','SSA','SystemSize',Omega,'Optimality','Ds_Optimal'); 
-[nanB,fitsB] = generateFits(numFits,numExp,numTrials,optionsB);
-dlmwrite('./1D_Michael/Data/200x20__SSA_Ds_90.txt',fitsB,'\t');
-dlmwrite('./1D_Michael/Data/200x20__SSA_Ds_90_nans.txt',nanB,'\t');
-
-optionsC = struct('DataSource','SSA','SystemSize',Omega,'Optimality','D_Optimal'); 
-[nanC,fitsC] = generateFits(numFits,numExp,numTrials,optionsC);
-dlmwrite('./1D_Michael/Data/200x20__SSA_D_90.txt',fitsC,'\t');
-dlmwrite('./1D_Michael/Data/200x20__SSA_D_90_nans.txt',nanC,'\t');
-
-optionsA2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','LinSpace'); 
-[nanA2,fitsA2] = generateFits(numFits,numExp,numTrials,optionsA2);
-dlmwrite('./1D_Michael/Data/200x20__Normal_LinSpace_90.txt',fitsA2,'\t');
-dlmwrite('./1D_Michael/Data/200x20__Normal_LinSpace_90_nans.txt',nanA2,'\t');
-
-optionsB2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','Ds_Optimal'); 
-[nanB2,fitsB2] = generateFits(numFits,numExp,numTrials,optionsB2);
-dlmwrite('./1D_Michael/Data/200x20__Normal_Ds_90.txt',fitsB2,'\t');
-dlmwrite('./1D_Michael/Data/200x20__Normal_Ds_90nans.txt',nanB2,'\t');
-
-optionsC2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','D_Optimal'); 
-[nanC2,fitsC2] = generateFits(numFits,numExp,numTrials,optionsC2);
-dlmwrite('./1D_Michael/Data/200x20__Normal_D_90.txt',fitsC2,'\t');
-dlmwrite('./1D_Michael/Data/200x20__Normal_D_90_nans.txt',nanC2,'\t');
+% optionsC2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','D_Optimal'); 
+% [nanC2,fitsC2] = generateFits(numFits,numExp,numTrials,optionsC2);
+% dlmwrite('./1D_Michael/Data/200x20__Normal_D_90.txt',fitsC2,'\t');
+% dlmwrite('./1D_Michael/Data/200x20__Normal_D_90_nans.txt',nanC2,'\t');
 
 
 % std_a0 = std(fits(:,1));
