@@ -1,5 +1,6 @@
 function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     thetas=[];
+    
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all
@@ -32,7 +33,61 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     pi0_func = Function('pi0_func',{par_sym,u_sym},{pi0});
     numNans=-0;
     if strcmp(options.DataSource,'SSA')
-        if options.SystemSize == 90
+        if options.SystemSize==60
+            loadData = dlmread('SSA_Data_60.txt');
+            if strcmp(options.Optimality,'D_Optimal')
+                u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+                inc = length(u)/numExp;
+                if inc<1
+                    disp('Too many experiments!');
+                    return
+                end 
+                u = u(1:round(inc):end);    
+                [u_opt, w_opt]=D_opt_c(par_true,Omega,u,FIM_comp(par_true,Omega,u,[0.1,0.2]),[0.1,0.2]);
+                numSamp=round(w_opt*numTrials*numExp);
+                
+                k=ones(1,length(u_opt));
+                for j=1:length(u_opt)
+                    [~,k(j)]=min(abs(u-u_opt(j)));
+                end
+                u_opt=u(k);
+                xVals = cell(numFits,length(u_opt));
+                
+                for i=1:length(u_opt)
+                    for j = 1:numFits
+                        data = datasample(loadData(:,i),numSamp(i),'Replace',false);
+                        xVals{j,i} = data;
+                    end
+                end
+                disp('xValues loaded, generating symbolic expressions');
+                syms = generateOptimSymbols(xVals(1,:),u_opt);
+                lb = [0.1 0.001 1 1];
+                ub = [1 3.75 20 3.75];
+                while numFits >= 0
+                    for i=1:numFits         
+                        mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,100,syms));
+                        flag=1;
+                        for k=1:4
+                            if ~(lb(k)<mini(k)&&ub(k)>mini(k))
+                                flag=0;
+                                break
+                            end
+                        end
+                        if (~isnan(mini))&(flag==1)
+                            thetas = [thetas; mini];
+                            disp(i);
+                        else
+                            numNans=numNans+1;
+                        end
+                    end
+                    numFits = numFits - size(thetas,1);
+                end
+            elseif strcmp(options.Optimality,'Ds_Optimal')
+                
+            elseif strcmp(options.Optimality,'LinSpace')
+                
+            end
+        elseif options.SystemSize == 90
             if strcmp(options.Optimality,'D_Optimal')
                 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
                 inc = length(u)/numExp;
@@ -60,7 +115,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals(1,:),u_opt);
                 lb = [0.1 0.001 1 1];
-                ub = [1 10 20 10];
+                ub = [1 3.75 20 3.75];
                 while numFits >= 0
                     for i=1:numFits         
                         mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,100,syms));
@@ -110,7 +165,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals(1,:),u_opt);
                 lb = [0.1 0.001 1 1];
-                ub = [1 10 20 10];
+                ub = [1 3.75 20 3.75];
                 while numFits >= 0
                     for i=1:numFits         
                         mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,100,syms));
@@ -157,7 +212,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals(1,:),u);
                 lb = [0.1 0.001 1 1];
-                ub = [1 5 10 4];
+                ub = [1 3.75 20 3.75];
                 while numFits >= 0
                     for i=1:numFits         
                         mini = transpose(casadiOptimize(xVals(i,:),u,lb,ub,100,syms));
@@ -231,7 +286,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals,u_opt);
                 lb = [0.1 0.001 1 1];
-                ub = [1 5 10 4];
+                ub = [1 3.75 20 3.75];
                 while numFits > 0
                     for i=1:numFits
                         mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,500,syms));
@@ -300,7 +355,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals,u_opt);
                 lb = [0.1 0.001 1 1];
-                ub = [1 5 10 4];
+                ub = [1 3.75 20 3.75];
                 while numFits > 0
                     for i=1:numFits
                         mini = transpose(casadiOptimize(xVals(i,:),u_opt,lb,ub,500,syms));
@@ -360,7 +415,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 disp('xValues loaded, generating symbolic expressions');
                 syms = generateOptimSymbols(xVals,u);
                 lb = [0.1 0.001 1 1];
-                ub = [1 5 10 4];
+                ub = [1 3.75 20 3.75];
                 while numFits > 0
                     for i=1:numFits
                         mini = transpose(casadiOptimize(xVals(i,:),u,lb,ub,500,syms));

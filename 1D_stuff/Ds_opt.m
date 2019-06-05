@@ -1,7 +1,7 @@
 
 function [u_opt, w_opt]=Ds_opt(pars,Omega,u_vec,FIM_vec,bounds)
-    
-    addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+    addpath('/mrastwoo/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+
     import casadi.*
 
     N_u=length(u_vec);
@@ -36,10 +36,10 @@ function [u_opt, w_opt]=Ds_opt(pars,Omega,u_vec,FIM_vec,bounds)
     %     'tol',1e-8,'dual_inf_tol',1,'constr_viol_tol',1e-4,...
     %     'acceptable_tol',1e-6,'acceptable_iter',15,'acceptable_dual_inf_tol',1e10,...
     %     'acceptable_obj_change_tol',1e20,'mu_strategy','adaptive');%,'max_iter',0);
-    ipopt_opts=struct('linear_solver','ma27','hessian_approximation','exact',...
+    ipopt_opts=struct('hessian_approximation','exact',...
         'tol',1e-3,'dual_inf_tol',10,'constr_viol_tol',1e-2,...
         'acceptable_tol',1e-1,'acceptable_iter',8,'acceptable_dual_inf_tol',1e10,...
-        'acceptable_obj_change_tol',1e10,'mu_strategy','adaptive','print_level',0,'max_iter',500);%,'max_iter',0);
+        'acceptable_obj_change_tol',1e10,'mu_strategy','adaptive','print_level',5,'max_iter',500);%,'max_iter',0);
 
     nlp_opts=struct('ipopt',ipopt_opts);
     solver = nlpsol('solver', 'ipopt', prob, nlp_opts);

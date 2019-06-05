@@ -13,6 +13,7 @@ SSA_L = dlmread('200x20__SSA_LinSpace_90.txt','\t');
 % scatterEData(SSA_L,6);
 
 h=figure(7);
+set(h,'Position', [10 10 900 900]);
 sz=25;
 subplots=[];
 ndm=[];
@@ -31,7 +32,66 @@ for i=1:4
     slm=[slm mean(SSA_L(:,i))];
 end
 
-subplots=[subplots subplot(2,3,1)];
+theta_t = [0.5,3,9,3];
+
+
+Omega = 90;
+numExp=20;
+u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+inc = length(u)/numExp;
+if inc<1
+    disp('Too many experiments!');
+    return
+end 
+u = u(1:round(inc):end);  
+
+
+
+co=inv(sum(200*FIM_comp([0.5,3,9,3,-18,117],Omega,u,[0.1,0.2]),3));
+co=co(1:4,1:4);
+co12 = co(1:2,1:2);
+co13 = [[co(1,1) co(1,3)];[co(3,1),co(3,3)]];
+co14 = [[co(1,1) co(1,4)];[co(4,1),co(4,4)]];
+co23 = [[co(2,2) co(2,3)];[co(3,2),co(3,3)]];
+co24 = [[co(2,2) co(2,4)];[co(4,2),co(4,4)]];
+co34 = [[co(3,3) co(3,4)];[co(4,3),co(4,4)]];
+
+[u_opt, w_opt]=D_opt_c([0.5,3,9,3,-18,117],Omega,u,FIM_comp([0.5,3,9,3,-18,117],Omega,u,[0.1,0.2]),[0.1,0.2]);
+numSamp=round(w_opt*200*20);
+fc = FIM_comp([0.5,3,9,3,-18,117],Omega,u_opt,[0.1,0.2]);
+Co=0;
+for i=1:length(u_opt)
+    Co = Co + numSamp(i)*fc(:,:,i);
+end
+Co=Co(1:4,1:4);
+Co=inv(Co);
+
+Co12 = Co(1:2,1:2);
+Co13 = [[Co(1,1) Co(1,3)];[Co(3,1),Co(3,3)]];
+Co14 = [[Co(1,1) Co(1,4)];[Co(4,1),Co(4,4)]];
+Co23 = [[Co(2,2) Co(2,3)];[Co(3,2),Co(3,3)]];
+Co24 = [[Co(2,2) Co(2,4)];[Co(4,2),Co(4,4)]];
+Co34 = [[Co(3,3) Co(3,4)];[Co(4,3),Co(4,4)]];
+
+[u2_opt, w2_opt]=Ds_opt([0.5,3,9,3,-18,117],Omega,u,FIM_comp([0.5,3,9,3,-18,117],Omega,u,[0.1,0.2]),[0.1,0.2]);
+numSamp=round(w2_opt*200*20);
+fc = FIM_comp([0.5,3,9,3,-18,117],Omega,u2_opt,[0.1,0.2]);
+Co2=0;
+for i=1:length(u2_opt)
+    Co2 = Co2 + numSamp(i)*fc(:,:,i);
+end
+Co2=Co2(1:4,1:4);
+Co2=inv(Co2);
+CO12 = Co2(1:2,1:2);
+CO13 = [[Co2(1,1) Co2(1,3)];[Co2(3,1),Co2(3,3)]];
+CO14 = [[Co2(1,1) Co2(1,4)];[Co2(4,1),Co2(4,4)]];
+CO23 = [[Co2(2,2) Co2(2,3)];[Co2(3,2),Co2(3,3)]];
+CO24 = [[Co2(2,2) Co2(2,4)];[Co2(4,2),Co2(4,4)]];
+CO34 = [[Co2(3,3) Co2(3,4)];[Co2(4,3),Co2(4,4)]];
+
+
+
+subplots=[subplots subplot(3,3,1)];
 hold on
 
 plotErrorEllipse(subplots(1),ndm([1,2]),cov([Norm_D(:,1) Norm_D(:,2)]),[0, 255, 25]/255);
@@ -52,15 +112,16 @@ scatter(subplots(1),sdsm(1),sdsm(2),25,[183, 0, 0]/255,'filled');
 plotErrorEllipse(subplots(1),slm([1,2]),cov([SSA_L(:,1) SSA_L(:,2)]),[96, 0, 0]/255);
 scatter(subplots(1),slm(1),slm(2),25,[96, 0, 0]/255,'filled');
 
+plotErrorEllipse(subplots(1),[0.5,3],CO12,[0, 20, 53]/255);
+plotErrorEllipse(subplots(1),[0.5,3],co12,[2, 56, 142]/255);
+plotErrorEllipse(subplots(1),[0.5,3],Co12,'blue');
 scatter(subplots(1),0.5,3,40,'blue');
 
 title(subplots(1),'\alpha versus \alpha_0');
 xlabel(subplots(1),'\alpha_0'); ylabel(subplots(1),'\alpha');
 hold off
 
-
-
-subplots=[subplots subplot(2,3,2)];
+subplots=[subplots subplot(3,3,2)];
 hold on
 
 plotErrorEllipse(subplots(2),ndm([1,3]),cov([Norm_D(:,1) Norm_D(:,3)]),[0, 255, 25]/255);
@@ -81,13 +142,16 @@ scatter(subplots(2),sdsm(1),sdsm(3),25,[183, 0, 0]/255,'filled');
 plotErrorEllipse(subplots(2),slm([1,3]),cov([SSA_L(:,1) SSA_L(:,3)]),[96, 0, 0]/255);
 scatter(subplots(2),slm(1),slm(3),25,[96, 0, 0]/255,'filled');
 
+plotErrorEllipse(subplots(2),[0.5,9],CO13,[0, 20, 53]/255);
+plotErrorEllipse(subplots(2),[0.5,9],co13,[2, 56, 142]/255);
+plotErrorEllipse(subplots(2),[0.5,9],Co13,'blue');
 scatter(subplots(2),0.5,9,40,'blue');
 
 title(subplots(2),'K versus \alpha_0');
 xlabel(subplots(2),'\alpha_0'); ylabel(subplots(2),'K');
 hold off
 
-subplots=[subplots subplot(2,3,3)];
+subplots=[subplots subplot(3,3,3)];
 hold on
 
 plotErrorEllipse(subplots(3),ndm([1,4]),cov([Norm_D(:,1) Norm_D(:,4)]),[0, 255, 25]/255);
@@ -108,13 +172,16 @@ scatter(subplots(3),sdsm(1),sdsm(4),25,[183, 0, 0]/255,'filled');
 plotErrorEllipse(subplots(3),slm([1,4]),cov([SSA_L(:,1) SSA_L(:,4)]),[96, 0, 0]/255);
 scatter(subplots(3),slm(1),slm(4),25,[96, 0, 0]/255,'filled');
 
+plotErrorEllipse(subplots(3),[0.5,3],CO14,[0, 20, 53]/255);
+plotErrorEllipse(subplots(3),[0.5,3],co14,[2, 56, 142]/255);
+plotErrorEllipse(subplots(3),[0.5,3],Co14,'blue');
 scatter(subplots(3),0.5,3,40,'blue');
 
 title(subplots(3),'n versus \alpha_0');
 xlabel(subplots(3),'\alpha_0'); ylabel(subplots(3),'n');
 hold off
 
-subplots=[subplots subplot(2,3,4)];
+subplots=[subplots subplot(3,3,4)];
 hold on
 
 plotErrorEllipse(subplots(4),ndm([2,3]),cov([Norm_D(:,2) Norm_D(:,3)]),[0, 255, 25]/255);
@@ -135,13 +202,16 @@ scatter(subplots(4),sdsm(2),sdsm(3),25,[183, 0, 0]/255,'filled');
 plotErrorEllipse(subplots(4),slm([2,3]),cov([SSA_L(:,2) SSA_L(:,3)]),[96, 0, 0]/255);
 scatter(subplots(4),slm(2),slm(3),25,[96, 0, 0]/255,'filled');
 
+plotErrorEllipse(subplots(4),[3,9],CO23,[0, 20, 53]/255);
+plotErrorEllipse(subplots(4),[3,9],co23,[2, 56, 142]/255);
+plotErrorEllipse(subplots(4),[3,9],Co23,'blue');
 scatter(subplots(4),3,9,40,'blue');
 
 title(subplots(4),'K versus \alpha');
 xlabel(subplots(4),'\alpha'); ylabel(subplots(4),'K');
 hold off
 
-subplots=[subplots subplot(2,3,5)];
+subplots=[subplots subplot(3,3,5)];
 hold on
 
 plotErrorEllipse(subplots(5),ndm([2,4]),cov([Norm_D(:,2) Norm_D(:,4)]),[0, 255, 25]/255);
@@ -162,13 +232,16 @@ scatter(subplots(5),sdsm(2),sdsm(4),25,[183, 0, 0]/255,'filled');
 plotErrorEllipse(subplots(5),slm([2,4]),cov([SSA_L(:,2) SSA_L(:,4)]),[96, 0, 0]/255);
 scatter(subplots(5),slm(2),slm(4),25,[96, 0, 0]/255,'filled');
 
+plotErrorEllipse(subplots(5),[3,3],CO24,[0, 20, 53]/255);
+plotErrorEllipse(subplots(5),[3,3],co24,[2, 56, 142]/255);
+plotErrorEllipse(subplots(5),[3,3],Co24,'blue');
 scatter(subplots(5),3,3,40,'blue');
 
 title(subplots(5),'n versus \alpha');
 xlabel(subplots(5),'\alpha'); ylabel(subplots(5),'n');
 hold off
 
-subplots=[subplots subplot(2,3,6)];
+subplots=[subplots subplot(3,3,6)];
 hold on
 
 plotErrorEllipse(subplots(6),ndm([3,4]),cov([Norm_D(:,3) Norm_D(:,4)]),[0, 255, 25]/255,'Normal D-Optimal');
@@ -187,95 +260,74 @@ plotErrorEllipse(subplots(6),sdsm([3,4]),cov([SSA_Ds(:,3) SSA_Ds(:,4)]),[183, 0,
 scatter(subplots(6),sdsm(3),sdsm(4),25,[183, 0, 0]/255,'filled','HandleVisibility','off');
 
 plotErrorEllipse(subplots(6),slm([3,4]),cov([SSA_L(:,3) SSA_L(:,4)]),[96, 0, 0]/255,'SSA Non-OED');
-scatter(subplots(6),slm(3),slm(4),25,[96, 0, 0]/255,'filled''HandleVisibility','off');
+scatter(subplots(6),slm(3),slm(4),25,[96, 0, 0]/255,'filled','HandleVisibility','off');
 
-scatter(subplots(6),9,3,40,'blue');
+plotErrorEllipse(subplots(6),[9,3],CO34,[0, 20, 53]/255, 'FIM Ds-Optimal');
+plotErrorEllipse(subplots(6),[9,3],co34,[2, 56, 142]/255, 'FIM Suboptimal');
+plotErrorEllipse(subplots(6),[9,3],Co34,'blue','FIM D-Optimal');
+scatter(subplots(6),9,3,40,'blue','HandleVisibility','off');
 
 title(subplots(6),'n versus K');
 xlabel(subplots(6),'K'); ylabel(subplots(6),'n');
 hold off
-legend(subplot(2,3,6));
+
+hleg = subplot(3,3,7);
+axis(hleg,'off');
+pleg = get(hleg,'Position');
+leg=legend(subplot(3,3,6));
+set(leg,'Position',pleg);
 saveas(h,'Covariance_Plot_200x20_90.png');
 
-%%
-% h = figure(3);
-% h.Color = [1,1,1];
-% 
-% sz=25;
-% 
-% c1= subplot(2,3,1);
-% hold on
-% scatter(c1,ssaMeans(1),ssaMeans(2),40,'red','filled');
-% plotErrorEllipse(c1,ssaMeans([1,2]),cov([SSAData(:,1) SSAData(:,2)]));
-% 
-% scatter(c1,normMeans(1),normMeans(2),40,'green','filled');
-% plotErrorEllipse(c1,normMeans([1,2]),cov([NormalData(:,1) NormalData(:,2)]),'green');
-% 
-% scatter(c1,0.5,3,40,'blue','filled');
-% hold off
-% title(c1,'\alpha versus \alpha_0');
-% xlabel(c1,'\alpha_0'); ylabel(c1,'\alpha');
-% 
-% c2=subplot(2,3,2);
-% hold on
-% scatter(c2,ssaMeans(1),ssaMeans(3),40,'red','filled');
-% plotErrorEllipse(c2,ssaMeans([1,3]),cov([SSAData(:,1) SSAData(:,3)]));
-% 
-% scatter(c2,normMeans(1),normMeans(3),40,'green','filled');
-% plotErrorEllipse(c2,normMeans([1,3]),cov([NormalData(:,1) NormalData(:,3)]),'green');
-% 
-% scatter(c2,0.5,9,40,'blue','filled');
-% hold off
-% title(c2,'K versus \alpha_0');
-% xlabel(c2,'\alpha_0'); ylabel(c2,'K');
-% 
-% c3=subplot(2,3,3);
-% hold on
-% scatter(c3,ssaMeans(1),ssaMeans(4),40,'red','filled');
-% plotErrorEllipse(c3,ssaMeans([1,4]),cov([SSAData(:,1) SSAData(:,4)]));
-% 
-% scatter(c3,normMeans(1),normMeans(4),40,'green','filled');
-% plotErrorEllipse(c3,normMeans([1,4]),cov([NormalData(:,1) NormalData(:,4)]),'green');
-% 
-% scatter(c3,0.5,3,40,'blue','filled');
-% hold off
-% title(c3,'n versus \alpha_0');
-% xlabel(c3,'\alpha_0'); ylabel(c3,'n');
-% 
-% c4=subplot(2,3,4);
-% hold on
-% scatter(c4,ssaMeans(2),ssaMeans(3),40,'red','filled');
-% plotErrorEllipse(c4,ssaMeans([2,3]),cov([SSAData(:,2) SSAData(:,3)]));
-% 
-% scatter(c4,normMeans(2),normMeans(3),40,'green','filled');
-% plotErrorEllipse(c4,normMeans([2,3]),cov([NormalData(:,2) NormalData(:,3)]),'green');
-% 
-% scatter(c4,3,9,40,'blue','filled');
-% hold off
-% title(c4,'K versus \alpha');
-% xlabel(c4,'\alpha'); ylabel(c4,'K');
-% 
-% c5=subplot(2,3,5);
-% hold on
-% scatter(c5,ssaMeans(2),ssaMeans(4),40,'red','filled');
-% plotErrorEllipse(c5,ssaMeans([2,4]),cov([SSAData(:,2) SSAData(:,4)]));
-% 
-% scatter(c5,normMeans(2),normMeans(4),40,'green','filled');
-% plotErrorEllipse(c5,normMeans([2,4]),cov([NormalData(:,2) NormalData(:,4)]),'green');
-% 
-% scatter(c5,3,3,40,'blue','filled');
-% hold off
-% title(c5,'n versus \alpha');
-% xlabel(c5,'\alpha'); ylabel(c5,'n');
-% 
-% c6=subplot(2,3,6);
-% hold on
-% scatter(c6,ssaMeans(3),ssaMeans(4),40,'red','filled');
-% plotErrorEllipse(c6,ssaMeans([3,4]),cov([SSAData(:,3) SSAData(:,4)]));
-% 
-% scatter(c6,normMeans(3),normMeans(4),40,'green','filled');
-% plotErrorEllipse(c6,normMeans([3,4]),cov([NormalData(:,3) NormalData(:,4)]),'green');
-% 
+disp('Biases');
+disp(norm(ndm-theta_t));
+disp(norm(ndsm-theta_t));
+disp(norm(nlm-theta_t));
+disp(norm(sdm-theta_t));
+disp(norm(sdsm-theta_t));
+disp(norm(slm-theta_t));
+disp('Determinants');
+disp(det(cov(Norm_D)));
+disp(det(cov(Norm_Ds)));
+disp(det(cov(Norm_L)));
+disp(det(cov(SSA_D)));
+disp(det(cov(SSA_Ds)));
+disp(det(cov(SSA_L)));
+
+sMSEd = [0 0 0 0];
+for i=1:size(SSA_D,1)
+    sMSEd=sMSEd+(theta_t - SSA_D(i,:)).*(theta_t - SSA_D(i,:))/size(SSA_D,1);
+end
+disp(norm(sMSEd));
+sMSEds = [0 0 0 0];
+for i=1:size(SSA_D,1)
+    sMSEds=sMSEds+(theta_t - SSA_Ds(i,:)).*(theta_t - SSA_Ds(i,:))/size(SSA_Ds,1);
+end
+disp(norm(sMSEds));
+sMSEl = [0 0 0 0];
+for i=1:size(SSA_L,1)
+    sMSEl=sMSEl+(theta_t - SSA_L(i,:)).*(theta_t - SSA_L(i,:))/size(SSA_L,1);
+end
+disp(norm(sMSEl));
+
+nMSEd = [0 0 0 0];
+for i=1:size(Norm_D,1)
+    nMSEd=nMSEd+(theta_t - Norm_D(i,:)).*(theta_t - Norm_D(i,:))/size(Norm_D,1);
+end
+disp(norm(nMSEd));
+nMSEds = [0 0 0 0];
+for i=1:size(Norm_D,1)
+    nMSEds=nMSEds+(theta_t - Norm_Ds(i,:)).*(theta_t - Norm_Ds(i,:))/size(Norm_Ds,1);
+end
+disp(norm(nMSEds));
+nMSEl = [0 0 0 0];
+for i=1:size(Norm_L,1)
+    nMSEl=nMSEl+(theta_t - Norm_L(i,:)).*(theta_t - Norm_L(i,:))/size(Norm_L,1);
+end
+disp(norm(nMSEl));
+
+
+
+ 
 function scatterEData(Data,fignum)
     means=[];
     for i=1:size(Data,2)
@@ -339,6 +391,8 @@ function scatterEData(Data,fignum)
     title(b6,'K versus n');
     xlabel(b6,'n'); ylabel(b6,'K');
 end
+
+functio
 
 function plotErrorEllipse(fig,mu,Sigma,color,name)
     [V,D] = eig(Sigma);

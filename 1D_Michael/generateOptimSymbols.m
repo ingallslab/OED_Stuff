@@ -1,7 +1,5 @@
 function sym = generateOptimSymbols(xVals,uVals)
-    
-    
-    
+    addpath('/Users/mrastwoo/Documents/MATLAB/Casadi')
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all
@@ -121,5 +119,5 @@ function sym = generateOptimSymbols(xVals,uVals)
 %     options.monitor = {'nlp_f','nlp_g'};
     solver = nlpsol('solver','ipopt',nlp,options);
     disp('solver has generated, beginning optimization');
-    sym = struct('optimVars',optimVars, 'logLik_tot',-logLik_tot,'lbg',lbg,'ubg',ubg,'solver',solver,'fixedparams',p);
+    sym = struct('theta_sym',theta_sym,'optimVars',optimVars, 'logLik_tot',-logLik_tot,'loglikF',Function('logLik_tot',{optimVars,p},{-logLik_tot}),'lbg',lbg,'ubg',ubg,'solver',solver,'fixedparams',p);
 end

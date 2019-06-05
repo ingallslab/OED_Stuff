@@ -13,9 +13,20 @@ opt = 'D_Optimal';  %Ds_Optimal, D_Optimal, LinSpace
 %   distributed data, which is generated based off of an OED procedure.
 
 Omega = 90;
+
+u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
+inc = length(u)/numExp;
+if inc<1
+    disp('Too many experiments!');
+    return
+end 
+u = u(1:round(inc):end);  
+
+covar=inv(sum(FIM_comp([0.5,3,9,3,-18,117],Omega,u,[0.1,0.2]),3));
+disp(covar(1:4,1:4));
 % 
-% optionsA = struct('DataSource','SSA','SystemSize',Omega,'Optimality','LinSpace'); 
-% [nanA,fitsA] = generateFits(numFits,numExp,numTrials,optionsA);
+%optionsA = struct('DataSource','SSA','SystemSize',Omega,'Optimality','LinSpace'); 
+%[nanA,fitsA] = generateFits(numFits,numExp,numTrials,optionsA);
 % dlmwrite(strcat('./1D_Michael/Data/200x20__SSA_LinSpace_90.txt'),fitsA,'\t');
 % dlmwrite('./1D_Michael/Data/200x20__SSA_LinSpace_90_nans.txt',nanA,'\t');
 % 

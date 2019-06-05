@@ -1,5 +1,5 @@
 function [u_opt, w_opt]=D_opt_c(pars,Omega,u_vec,FIM_vec,bounds)
-    
+ 
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
 

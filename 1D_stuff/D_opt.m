@@ -1,6 +1,6 @@
 
 function [u_opt, w_opt]=D_opt(pars,Omega,u_vec,FIM_vec,bounds)
-
+    addpath('/Users/mrastwoo/Documents/MATLAB/cvx');
     N_u=length(u_vec);
     Np=length(pars);
     

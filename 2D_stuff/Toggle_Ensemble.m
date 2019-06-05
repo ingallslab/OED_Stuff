@@ -1,5 +1,9 @@
 function Yend=Toggle_Ensemble(initX,u_vals,OMEGA,finTime,num)
-
+    %initX = initial points
+    %u_vals = inputs to simulate
+    %OMEGA = system size
+    %fintime = how long to simulate for
+    %num = number of simulations to do
     if size(initX,1)==1
         X0=repmat(initX,num,1);
     elseif size(initX,1)==num
@@ -73,7 +77,7 @@ function Yend=Toggle_Ensemble(initX,u_vals,OMEGA,finTime,num)
 
             %Step 3: carry out the reaction mu_next
             % Carries out the reaction and advances the time
-            t =t + tau;
+            t = t + tau;
             Xold=X;
             X=X+ R_mu(next_mu,1:N);
 

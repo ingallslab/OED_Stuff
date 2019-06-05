@@ -1,6 +1,6 @@
 function FIM_vec=FIM_comp(pars,Omega,u_vec,bounds)
 
-    addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+    addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
 
     theta=pars(1:4);

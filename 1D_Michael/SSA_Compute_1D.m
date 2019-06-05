@@ -64,6 +64,10 @@ function Yend=SSA_Compute_1D(initX,u,OMEGA,finTime,num)
 
         end %end of main loop
         Yend(i)=Xold/OMEGA;
+        if mod(i,1000)==0
+            disp(i);
+        end
     end
+    disp('Finished a sim!');
     
 end

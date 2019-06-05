@@ -67,7 +67,7 @@ x_theta=-g_theta./g_x;
 x_theta_func = Function('x_theta_func', {x_sym,u_sym,theta_sym}, {x_theta});
 
 %sigma2=(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)^2/Omega_sym;
-sigma2=(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
+sigma2=-(a0_sym+a_sym*((u_sym+x_sym).^n_sym)./(K_sym+(u_sym+x_sym).^n_sym)+x_sym)/(2*Omega_sym*g_x);
 %log sensitivities
 sigma2_theta=jacobian(sigma2,theta_sym);
 sigma2_x=jacobian(sigma2,x_sym);
