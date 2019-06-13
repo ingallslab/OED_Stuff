@@ -1,9 +1,9 @@
-Norm_D = dlmread('200x20__Normal_D_90.txt','\t');
-Norm_Ds = dlmread('200x20__Normal_Ds_90.txt','\t');
-Norm_L = dlmread('200x20__Normal_LinSpace_90.txt','\t');
-SSA_D = dlmread('200x20__SSA_D_90.txt','\t');
-SSA_Ds = dlmread('200x20__SSA_Ds_90.txt','\t');
-SSA_L = dlmread('200x20__SSA_LinSpace_90.txt','\t');
+Norm_D = dlmread('500x8__Normal_D_90.txt','\t');
+Norm_Ds = dlmread('500x8__Normal_Ds_90.txt','\t');
+Norm_L = dlmread('500x8__Normal_LinSpace_90.txt','\t');
+SSA_D = dlmread('500x8__SSA_D_90.txt','\t');
+SSA_Ds = dlmread('500x8__SSA_Ds_90.txt','\t');
+SSA_L = dlmread('500x8__SSA_LinSpace_90.txt','\t');
 
 % scatterEData(Norm_D,1);
 % scatterEData(Norm_Ds,2);
@@ -262,6 +262,7 @@ scatter(subplots(6),sdsm(3),sdsm(4),25,[183, 0, 0]/255,'filled','HandleVisibilit
 plotErrorEllipse(subplots(6),slm([3,4]),cov([SSA_L(:,3) SSA_L(:,4)]),[96, 0, 0]/255,'SSA Non-OED');
 scatter(subplots(6),slm(3),slm(4),25,[96, 0, 0]/255,'filled','HandleVisibility','off');
 
+
 plotErrorEllipse(subplots(6),[9,3],CO34,[0, 20, 53]/255, 'FIM Ds-Optimal');
 plotErrorEllipse(subplots(6),[9,3],co34,[2, 56, 142]/255, 'FIM Suboptimal');
 plotErrorEllipse(subplots(6),[9,3],Co34,'blue','FIM D-Optimal');
@@ -276,8 +277,27 @@ axis(hleg,'off');
 pleg = get(hleg,'Position');
 leg=legend(subplot(3,3,6));
 set(leg,'Position',pleg);
-saveas(h,'Covariance_Plot_200x20_90.png');
+saveas(h,'Covariance_Plot_500x8_90.png');
 
+% figure
+% [X,Y]=meshgrid(8.4:0.001:9.2,2.65:0.001:3.05);
+% qform1=zeros(size(X,1),size(X,2));
+% qform2=zeros(size(X,1),size(X,2));
+% qform3=zeros(size(X,1),size(X,2));
+% for i=1:size(X,1)
+%     for j=1:size(Y,2)
+%         w = [9-X(i,j);3-Y(i,j)];
+%         qform1(i,j) = w'*(co34)*w;
+%         qform2(i,j) = w'*(Co34)*w;
+%         qform3(i,j) = w'*(CO34)*w;
+%     end
+% end
+% hold on
+% s=surf(X,Y,qform1);
+% s.EdgeColor = 'none';
+% %surf(X,Y,qform2,[1,1],'blue');
+% %surf(X,Y,qform3,[1,1],'blue');
+% hold off
 disp('Biases');
 disp(norm(ndm-theta_t));
 disp(norm(ndsm-theta_t));
@@ -292,7 +312,14 @@ disp(det(cov(Norm_L)));
 disp(det(cov(SSA_D)));
 disp(det(cov(SSA_Ds)));
 disp(det(cov(SSA_L)));
+disp('Information');
+disp(det(co));
+disp(det(Co));
+disp(det(Co2));
 
+
+
+disp('MSE');
 sMSEd = [0 0 0 0];
 for i=1:size(SSA_D,1)
     sMSEd=sMSEd+(theta_t - SSA_D(i,:)).*(theta_t - SSA_D(i,:))/size(SSA_D,1);
@@ -325,9 +352,6 @@ for i=1:size(Norm_L,1)
 end
 disp(norm(nMSEl));
 
-
-
- 
 function scatterEData(Data,fignum)
     means=[];
     for i=1:size(Data,2)

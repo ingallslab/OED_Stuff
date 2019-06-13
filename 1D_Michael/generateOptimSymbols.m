@@ -3,7 +3,7 @@ function sym = generateOptimSymbols(xVals,uVals)
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all
-    Omega = 90;
+    Omega = 60;
     uLow = 0.1;
     uHigh = 0.2;   
     
