@@ -1,4 +1,4 @@
-numFits = 100;
+numFits = 900;
 numExp = 8;
 numTrials = 500;
 
@@ -10,68 +10,104 @@ numTrials = 500;
 %   was generated). We compare this to the Ds-Optimal and D-Optimally
 %   distributed data, which is generated based off of an OED procedure.
 
-Omega = 60;
-
-u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
-inc = length(u)/numExp;
-if inc<1
-    disp('Too many experiments!');
-    return
-end 
-u = u(16:inc:end);  
+% spmd
+%    if labindex==1
+%         optionsA1 = struct('DataSource','SSA','SystemSize',90,'Optimality','LinSpace');
+%         [nanA1,fitsA1] = generateFits(numFits,numExp,numTrials,optionsA1);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_90.txt',fitsA1,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_90_nans.txt',nanA1,'-append','delimiter','\t');
+%         
+%         optionsB1 = struct('DataSource','SSA','SystemSize',90,'Optimality','Ds_Optimal');
+%         [nanB1,fitsB1] = generateFits(numFits,numExp,numTrials,optionsB1);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_90.txt',fitsB1,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_90_nans.txt',nanB1,'-append','delimiter','\t');
+%    elseif labindex==2
+%         optionsC1 = struct('DataSource','SSA','SystemSize',90,'Optimality','D_Optimal');
+%         [nanC1,fitsC1] = generateFits(numFits,numExp,numTrials,optionsC1);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_D_90.txt',fitsC1,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_D_90_nans.txt',nanC1,'-append','delimiter','\t');
+%         
+%         optionsA21 = struct('DataSource','Normal','SystemSize',90,'Optimality','LinSpace');
+%         [nanA21,fitsA21] = generateFits(numFits,numExp,numTrials,optionsA21);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_90.txt',fitsA21,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_90_nans.txt',nanA21,'-append','delimiter','\t');
+%    elseif labindex==3
+%         optionsB21 = struct('DataSource','Normal','SystemSize',90,'Optimality','Ds_Optimal');
+%         [nanB21,fitsB21] = generateFits(numFits,numExp,numTrials,optionsB21);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_90.txt',fitsB21,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_90nans.txt',nanB21,'-append','delimiter','\t');
+%    elseif labindex==4
+%         optionsC21 = struct('DataSource','Normal','SystemSize',90,'Optimality','D_Optimal');
+%         [nanC21,fitsC21] = generateFits(numFits,numExp,numTrials,optionsC21);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_D_90.txt',fitsC21,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_D_90_nans.txt',nanC21,'-append','delimiter','\t');
+%    end
+% end
 
 spmd
    if labindex==1
-        optionsA = struct('DataSource','SSA','SystemSize',Omega,'Optimality','LinSpace');
-        [nanA,fitsA] = generateFits(numFits,numExp,numTrials,optionsA);
-        dlmwrite(strcat('./1D_Michael/Data/500x8__SSA_LinSpace_60.txt'),fitsA,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_60_nans.txt',nanA,'\t');
-        
-        optionsB = struct('DataSource','SSA','SystemSize',Omega,'Optimality','Ds_Optimal');
-        [nanB,fitsB] = generateFits(numFits,numExp,numTrials,optionsB);
-        dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_60.txt',fitsB,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_60_nans.txt',nanB,'\t');
-   elseif labindex==2
-        optionsC = struct('DataSource','SSA','SystemSize',Omega,'Optimality','D_Optimal');
-        [nanC,fitsC] = generateFits(numFits,numExp,numTrials,optionsC);
-        dlmwrite('./1D_Michael/Data/500x8__SSA_D_60.txt',fitsC,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__SSA_D_60_nans.txt',nanC,'\t');
-        
-        optionsA2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','LinSpace');
+        optionsA2 = struct('DataSource','SSA','SystemSize',60,'Optimality','LinSpace');
         [nanA2,fitsA2] = generateFits(numFits,numExp,numTrials,optionsA2);
-        dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_60.txt',fitsA2,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_60_nans.txt',nanA2,'\t');
-   elseif labindex==3
-        optionsB2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','Ds_Optimal');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_60.txt',fitsA2,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_60_nans.txt',nanA2,'-append','delimiter','\t');
+        
+        optionsB2 = struct('DataSource','SSA','SystemSize',60,'Optimality','Ds_Optimal');
         [nanB2,fitsB2] = generateFits(numFits,numExp,numTrials,optionsB2);
-        dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_60.txt',fitsB2,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_60nans.txt',nanB2,'\t');
-   elseif labindex==4
-        optionsC2 = struct('DataSource','Normal','SystemSize',Omega,'Optimality','D_Optimal');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_60.txt',fitsB2,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_60_nans.txt',nanB2,'-append','delimiter','\t');
+   elseif labindex==2
+        optionsC2 = struct('DataSource','SSA','SystemSize',60,'Optimality','D_Optimal');
         [nanC2,fitsC2] = generateFits(numFits,numExp,numTrials,optionsC2);
-        dlmwrite('./1D_Michael/Data/500x8__Normal_D_60.txt',fitsC2,'\t');
-        dlmwrite('./1D_Michael/Data/500x8__Normal_D_60_nans.txt',nanC2,'\t');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_D_60.txt',fitsC2,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__SSA_D_60_nans.txt',nanC2,'-append','delimiter','\t');
+        
+        optionsA22 = struct('DataSource','Normal','SystemSize',60,'Optimality','LinSpace');
+        [nanA22,fitsA22] = generateFits(numFits,numExp,numTrials,optionsA22);
+        dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_60.txt',fitsA22,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_60_nans.txt',nanA22,'-append','delimiter','\t');
+   elseif labindex==3
+        optionsB22 = struct('DataSource','Normal','SystemSize',60,'Optimality','Ds_Optimal');
+        [nanB22,fitsB22] = generateFits(numFits,numExp,numTrials,optionsB22);
+        dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_60.txt',fitsB22,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_60nans.txt',nanB22,'-append','delimiter','\t');
+   elseif labindex==4
+        optionsC22 = struct('DataSource','Normal','SystemSize',60,'Optimality','D_Optimal');
+        [nanC22,fitsC22] = generateFits(numFits,numExp,numTrials,optionsC22);
+        dlmwrite('./1D_Michael/Data/500x8__Normal_D_60.txt',fitsC22,'-append','delimiter','\t');
+        dlmwrite('./1D_Michael/Data/500x8__Normal_D_60_nans.txt',nanC22,'-append','delimiter','\t');
    end
 end
 
-% std_a0 = std(fits(:,1));
-% std_a = std(fits(:,2));
-% std_K = std(fits(:,3));
-% std_n = std(fits(:,4));
-% a_a0 = mean(fits(:,1));
-% a_a = mean(fits(:,2));
-% a_K = mean(fits(:,3));
-% a_n = mean(fits(:,4));
-% 
-% 
-% disp('Covariance Matrix');
-% disp(cov(fits));
-% disp(strcat("Variance in a0: ",num2str((std_a0)^2)));
-% disp(strcat("Variance in a: ",num2str((std_a)^2)));
-% disp(strcat("Variance in K: ",num2str((std_K)^2)));
-% disp(strcat("Variance in n: ",num2str((std_n)^2)));
-% 
-% disp(strcat("Mean a0: ",num2str(a_a0)));
-% disp(strcat("Mean a: ",num2str(a_a)));
-% disp(strcat("Mean K: ",num2str(a_K)));
-% disp(strcat("Mean n: ",num2str(a_n)));
+% spmd
+%    if labindex==1
+%         optionsA3 = struct('DataSource','SSA','SystemSize',120,'Optimality','LinSpace');
+%         [nanA3,fitsA3] = generateFits(numFits,numExp,numTrials,optionsA3);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_120.txt',fitsA3,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_LinSpace_120_nans.txt',nanA3,'-append','delimiter','\t');
+%         
+%         optionsB3 = struct('DataSource','SSA','SystemSize',120,'Optimality','Ds_Optimal');
+%         [nanB3,fitsB3] = generateFits(numFits,numExp,numTrials,optionsB3);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_120.txt',fitsB3,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_Ds_120_nans.txt',nanB3,'-append','delimiter','\t');
+%    elseif labindex==2
+%         optionsC3 = struct('DataSource','SSA','SystemSize',120,'Optimality','D_Optimal');
+%         [nanC3,fitsC3] = generateFits(numFits,numExp,numTrials,optionsC3);
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_D_120.txt',fitsC3,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__SSA_D_120_nans.txt',nanC3,'-append','delimiter','\t');
+%         
+%         optionsA23 = struct('DataSource','Normal','SystemSize',120,'Optimality','LinSpace');
+%         [nanA23,fitsA23] = generateFits(numFits,numExp,numTrials,optionsA23);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_120.txt',fitsA23,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_LinSpace_120_nans.txt',nanA23,'-append','delimiter','\t');
+%    elseif labindex==3
+%         optionsB23 = struct('DataSource','Normal','SystemSize',120,'Optimality','Ds_Optimal');
+%         [nanB23,fitsB23] = generateFits(numFits,numExp,numTrials,optionsB23);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_120.txt',fitsB23,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_Ds_120nans.txt',nanB23,'-append','delimiter','\t');
+%    elseif labindex==4
+%         optionsC23 = struct('DataSource','Normal','SystemSize',120,'Optimality','D_Optimal');
+%         [nanC23,fitsC23] = generateFits(numFits,numExp,numTrials,optionsC23);
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_D_120.txt',fitsC23,'-append','delimiter','\t');
+%         dlmwrite('./1D_Michael/Data/500x8__Normal_D_120_nans.txt',nanC23,'-append','delimiter','\t');
+%    end
+% end

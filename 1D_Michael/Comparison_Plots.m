@@ -99,7 +99,7 @@ for i=1:size(Norm_L_90,1)
     nMSEl_90=nMSEl_90+(theta_t - Norm_L_90(i,:)).*(theta_t - Norm_L_90(i,:))/size(Norm_L_90,1);
 end
 
-mse_90 = [sMSEd_90;sMSEds_90;sMSEl_90;nMSEd_90;nMSEds_90;nMSEl_90];
+mse_90 = [norm(sMSEd_90);norm(sMSEds_90);norm(sMSEl_90);norm(nMSEd_90);norm(nMSEds_90);norm(nMSEl_90)];
 %%
 biases_60 = [norm(ndm_60-theta_t);norm(ndsm_60-theta_t);norm(nlm_60-theta_t);...
     norm(sdm_60-theta_t);norm(sdsm_60-theta_t);norm(slm_60-theta_t)];
@@ -130,7 +130,7 @@ for i=1:size(Norm_L_60,1)
     nMSEl_60=nMSEl_60+(theta_t - Norm_L_60(i,:)).*(theta_t - Norm_L_60(i,:))/size(Norm_L_60,1);
 end
 
-mse_60 = [sMSEd_60;sMSEds_60;sMSEl_60;nMSEd_60;nMSEds_60;nMSEl_60];
+mse_60 = [norm(sMSEd_60);norm(sMSEds_60);norm(sMSEl_60);norm(nMSEd_60);norm(nMSEds_60);norm(nMSEl_60)];
 %%
 biases_120 = [norm(ndm_120-theta_t);norm(ndsm_120-theta_t);norm(nlm_120-theta_t);...
     norm(sdm_120-theta_t);norm(sdsm_120-theta_t);norm(slm_120-theta_t)];
@@ -161,7 +161,7 @@ for i=1:size(Norm_L_120,1)
     nMSEl_120=nMSEl_120+(theta_t - Norm_L_120(i,:)).*(theta_t - Norm_L_120(i,:))/size(Norm_L_120,1);
 end
 
-mse_120 = [sMSEd_120;sMSEds_120;sMSEl_120;nMSEd_120;nMSEds_120;nMSEl_120];
+mse_120 = [norm(sMSEd_120);norm(sMSEds_120);norm(sMSEl_120);norm(nMSEd_120);norm(nMSEds_120);norm(nMSEl_120)];
 %%
 disp(biases_60');
 disp(biases_90');
@@ -170,7 +170,37 @@ disp(covariances_60');
 disp(covariances_90');
 disp(covariances_120');
 
-
-
-
-
+Omega = [60 90 120];
+biases = [biases_60 biases_90 biases_120];
+covars = [covariances_60 covariances_90 covariances_120];
+mses = [mse_60 mse_90 mse_120];
+fig=figure('Renderer', 'painters', 'Position', [10 10 900 800])
+f = subplot(2,2,1);
+hold on
+for i=1:size(biases,1)
+    plot(Omega,biases(i,:));
+end
+title("Norm-Bias versus System Size ($\|\theta - \sum_{i=1}^N\hat{\theta_i}/N\|$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\|\theta - \sum_{i=1}^N\hat{\theta_i}/N\|$','Interpreter','latex');
+hold off
+g = subplot(2,2,2);
+hold on
+for i=1:size(covars,1)
+    plot(Omega,log10(covars(i,:)));
+end
+title("Log-Covariance versus System Size ($\log_{10}(|\textrm{Cov}(\hat\theta)|)$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\log_{10}(|\textrm{Cov}(\hat\theta)|)$','Interpreter','latex');
+legend('Norm D','Norm Ds', 'Norm L', 'SSA D', 'SSA Ds', 'SSA L');
+hold off
+h=subplot(2,2,[3,4]);
+hold on
+for i=1:size(mses,1)
+    plot(Omega,log10(mses(i,:)));
+end
+title("Mean-Squared Error versus System Size ($\sum_{i=1}^N\|\theta-\hat\theta_i\|^2/N$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N\|\theta-\hat\theta_i\|^2/N$','Interpreter','latex');
+hold off
+saveas(fig,'500x8 Comparison Plots.png');

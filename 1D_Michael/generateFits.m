@@ -6,7 +6,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     close all
     Omega = options.SystemSize;
     c_60 = [-12.1,73.8];
-    c_60 = [-18.1,111.7];
+    c_90 = [-18.1,111.7];
     c_120= [-24.2,150.3];
     par_true = [0.5,3,9,3,c_60];
     
