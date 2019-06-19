@@ -1,4 +1,4 @@
-addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
 import casadi.*
 close all
 
@@ -66,7 +66,7 @@ g_x=jacobian(g,x_sym);
 g_x_func = Function('g_x_func', {x_sym,u1_sym,u2_sym,theta_sym}, {g_x});
 
 %%
-OMEGA=.05;
+OMEGA=.01;
 totalTime=20*60;
 
 phi_1=[0.45 0];
@@ -76,8 +76,8 @@ u=.45;
 u_vals=(phi_2-phi_1)*u+phi_1;
 %%
 
-% [YOut,tdom]=Toggle_SSA([0 0],u_vals,OMEGA,totalTime);
-% 
+[YOut,tdom]=Toggle_SSA([0 0],u_vals,OMEGA,totalTime);
+
 % figure
 % plot(tdom/60,YOut(1,:),tdom/60,YOut(2,:))
 
@@ -86,7 +86,7 @@ u_vec=[0:0.01:1];
 %Z=zeros(size(u_vec));
 u_l=NaN; u_r=NaN;
 flag=0;
-sgn_cnt_lst=1;
+sgn_cnt=1;
 for i=1:length(u_vec)
     u_vals=(phi_2-phi_1)*u_vec(i)+phi_1;
     g_roots1=@(x_1) g_func1(x_1,u_vals(1),u_vals(2));
@@ -105,7 +105,7 @@ end
 del_u=u_r-u_l;
 del_u5p=del_u*.05;
 
-%%
+%% switching times
 
 % u_tau=linspace(u_l+del_u5p,u_r-del_u5p,10);
 % Omeg_vec=[0.008 0.01 0.02];
@@ -151,91 +151,89 @@ del_u5p=del_u*.05;
 % 
 % end
 % 
-% 
 % figure
 % hold on
 % plot(u_tau,tau_low)
 % plot(u_tau,tau_high)
 % hold off
-% 
-% 
-%   
-% %%
-%  
-% x1_vec=[1:4000];
-% x2_vec=[1:1500];
-% 
-% STD = 2;                     %# 2 standard deviations
-% conf = 2*normcdf(STD)-1;     %# covers around 95% of population
-% scale = chi2inv(conf,2)*(1/OMEGA); % ADDED OMEGA FACTOR HERE
-% 
-% t = linspace(0,2*pi,100);
-% e = [cos(t) ; sin(t)];
-% 
-% g_roots1=@(x_1) g_func1(x_1,u_vals(1),u_vals(2));
-% [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
-% x2_low=x2_null(x1_low,u_vals(1));
-% x2_mid=x2_null(x1_mid,u_vals(1));
-% x2_high=x2_null(x1_high,u_vals(1));
-% 
-% A_low=full(g_x_func([x1_low x2_low],u_vals(1),u_vals(2),theta));
-% B_low=B_func([x1_low x2_low],u_vals(1),u_vals(2));
-% C_low = lyap(A_low,B_low);
-% 
-% [V D] = eig( scale*C_low );     %#' cov(X0)
-% [D order] = sort(diag(D), 'descend');
-% D = diag(D);
-% V = V(:, order);
-% 
-% %# unit circle
-% VV = V*sqrt(D);               %# scale eigenvectors
-% e_low = bsxfun(@plus, VV*e, [x1_low x2_low]'); %#' project circle back to orig space
-% 
-% if ~(x1_low==x1_mid&&x1_mid==x1_high)
-% 
-%     A_high=full(g_x_func([x1_high x2_high],u_vals(1),u_vals(2),theta));
-%     B_high=B_func([x1_high x2_high],u_vals(1),u_vals(2));
-%     C_high = lyap(A_high,B_high);
-% 
-%     [V D] = eig( scale*C_high );     %#' cov(X0)
-%     [D order] = sort(diag(D), 'descend');
-%     D = diag(D);
-%     V = V(:, order);
-% 
-%     VV = V*sqrt(D);               %# scale eigenvectors
-%     e_hgh = bsxfun(@plus, VV*e, [x1_high x2_high]'); %#' project circle back to orig space
-% 
-%     J0=full(g_x_func([x1_mid x2_mid],u_vals(1),u_vals(2),theta));
-%     [eVecs,eVals]=eig(J0);
-%     eVals=diag(eVals)';
-%     vectr=eVecs(:,eVals<0);
-%     vectr=vectr/norm(vectr);
-%     g_func_fixed = @(t,x) -g_func(x,u_vals(1),u_vals(2))';
-%     Opt_r = odeset('Events', @myEvent_r);
-%     Opt_l = odeset('Events', @myEvent_l);
-%     [~,y_r] = ode45(g_func_fixed,[0 10],[x1_mid; x2_mid]+0.001*vectr,Opt_r);
-%     [~,y_l] = ode45(g_func_fixed,[0 10],[x1_mid; x2_mid]-0.001*vectr,Opt_l);
-% end
-% 
-% figure
-% hold on
-% plot(x1_vec,x2_null(x1_vec,u_vals(1)),'-k')
-% plot(x1_null(x2_vec,u_vals(2)),x2_vec,'-.k')
-% plot(x1_low,x2_low,'b*')
-% plot(e_low(1,:), e_low(2,:), 'Color','k');
-% if ~(x1_low==x1_mid&&x1_mid==x1_high)
-%     plot(x1_high,x2_high,'b*')
-%     plot(x1_mid,x2_mid,'ro')
-%     quiver(x1_mid,x2_mid,vectr(1),vectr(2),100)
-%     plot(y_r(:,1),y_r(:,2),'--r')
-%     plot(y_l(:,1),y_l(:,2),'--r')
-%     plot([0 4000],(vectr(2)/vectr(1))*([0 4000]-x1_mid)+x2_mid,':b')
-%     plot(e_hgh(1,:), e_hgh(2,:), 'Color','k');
-% end
-% plot(YOut(1,:),YOut(2,:),'g')
-% xlim([0 4000])
-% ylim([0 1500])
-% hold off
+
+  
+%%
+ 
+x1_vec=[1:4000];
+x2_vec=[1:1500];
+
+STD = 2;                     %# 2 standard deviations
+conf = 2*normcdf(STD)-1;     %# covers around 95% of population
+scale = chi2inv(conf,2)*(1/OMEGA); % ADDED OMEGA FACTOR HERE
+
+t = linspace(0,2*pi,100);
+e = [cos(t) ; sin(t)];
+
+g_roots1=@(x_1) g_func1(x_1,u_vals(1),u_vals(2));
+[x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
+x2_low=x2_null(x1_low,u_vals(1));
+x2_mid=x2_null(x1_mid,u_vals(1));
+x2_high=x2_null(x1_high,u_vals(1));
+
+A_low=full(g_x_func([x1_low x2_low],u_vals(1),u_vals(2),theta));
+B_low=B_func([x1_low x2_low],u_vals(1),u_vals(2));
+C_low = lyap(A_low,B_low);
+
+[V D] = eig( scale*C_low );     %#' cov(X0)
+[D order] = sort(diag(D), 'descend');
+D = diag(D);
+V = V(:, order);
+
+%# unit circle
+VV = V*sqrt(D);               %# scale eigenvectors
+e_low = bsxfun(@plus, VV*e, [x1_low x2_low]'); %#' project circle back to orig space
+
+if ~(x1_low==x1_mid&&x1_mid==x1_high)
+
+    A_high=full(g_x_func([x1_high x2_high],u_vals(1),u_vals(2),theta));
+    B_high=B_func([x1_high x2_high],u_vals(1),u_vals(2));
+    C_high = lyap(A_high,B_high);
+
+    [V D] = eig( scale*C_high );     %#' cov(X0)
+    [D order] = sort(diag(D), 'descend');
+    D = diag(D);
+    V = V(:, order);
+
+    VV = V*sqrt(D);               %# scale eigenvectors
+    e_hgh = bsxfun(@plus, VV*e, [x1_high x2_high]'); %#' project circle back to orig space
+
+    J0=full(g_x_func([x1_mid x2_mid],u_vals(1),u_vals(2),theta));
+    [eVecs,eVals]=eig(J0);
+    eVals=diag(eVals)';
+    vectr=eVecs(:,eVals<0);
+    vectr=vectr/norm(vectr);
+    g_func_fixed = @(t,x) -g_func(x,u_vals(1),u_vals(2))';
+    Opt_r = odeset('Events', @myEvent_r);
+    Opt_l = odeset('Events', @myEvent_l);
+    [~,y_r] = ode45(g_func_fixed,[0 10],[x1_mid; x2_mid]+0.001*vectr,Opt_r);
+    [~,y_l] = ode45(g_func_fixed,[0 10],[x1_mid; x2_mid]-0.001*vectr,Opt_l);
+end
+
+figure
+hold on
+plot(x1_vec,x2_null(x1_vec,u_vals(1)),'-k')
+plot(x1_null(x2_vec,u_vals(2)),x2_vec,'-.k')
+plot(x1_low,x2_low,'b*')
+plot(e_low(1,:), e_low(2,:), 'Color','k');
+if ~(x1_low==x1_mid&&x1_mid==x1_high)
+    plot(x1_high,x2_high,'b*')
+    plot(x1_mid,x2_mid,'ro')
+    quiver(x1_mid,x2_mid,vectr(1),vectr(2),100)
+    plot(y_r(:,1),y_r(:,2),'--r')
+    plot(y_l(:,1),y_l(:,2),'--r')
+    plot([0 4000],(vectr(2)/vectr(1))*([0 4000]-x1_mid)+x2_mid,':b')
+    plot(e_hgh(1,:), e_hgh(2,:), 'Color','k');
+end
+plot(YOut(1,:),YOut(2,:),'g')
+xlim([0 4000])
+ylim([0 1500])
+hold off
 
 
 %%
@@ -294,7 +292,6 @@ for i=1:length(u_vec)
 end
 xlim([0 4000])
 ylim([0 1500])
-
 
 
 %%
