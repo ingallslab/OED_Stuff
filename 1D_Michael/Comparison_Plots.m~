@@ -206,7 +206,6 @@ legend('Norm D','Norm Ds', 'Norm L', 'SSA D', 'SSA Ds', 'SSA L');
 hold off
 h=subplot(3,2,3);
 hold on
-title("Semilog plot of Percent Error (MSE) in $\hat \theta^1$",'Interpreter','latex','Fontsize',14 )
     set(gca, 'YScale', 'log');
     semilogy(Omega,Mse_N_D(:,1), 'LineWidth',1);
     semilogy(Omega,Mse_N_Ds(:,1), 'LineWidth',1);
@@ -215,12 +214,11 @@ title("Semilog plot of Percent Error (MSE) in $\hat \theta^1$",'Interpreter','la
     semilogy(Omega,Mse_S_Ds(:,1), 'LineWidth',1);
     semilogy(Omega,Mse_S_L(:,1), 'LineWidth',1);
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\sum_{i=1}^N (\theta^1 - \hat \theta_i^1)^2/N$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N (\theta_1 - \hat \theta_1)^2 $','Interpreter','latex');
 hold off
 
 h=subplot(3,2,4);
 hold on
-title("Semilog plot of Percent Error (MSE) in $\hat \theta^2$",'Interpreter','latex','Fontsize',14 )
 set(gca, 'YScale', 'log');
     semilogy(Omega,Mse_N_D(:,2), 'LineWidth',1);
     semilogy(Omega,Mse_N_Ds(:,2), 'LineWidth',1);
@@ -229,12 +227,10 @@ set(gca, 'YScale', 'log');
     semilogy(Omega,Mse_S_Ds(:,2), 'LineWidth',1);
     semilogy(Omega,Mse_S_L(:,2), 'LineWidth',1);
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\sum_{i=1}^N (\theta^2 - \hat \theta_i^2)^2/N$','Interpreter','latex');
 hold off
 
 h=subplot(3,2,5);
 hold on
-title("Semilog plot of Percent Error (MSE) in $\hat \theta^3$",'Interpreter','latex','Fontsize',14 )
 set(gca, 'YScale', 'log');
     semilogy(Omega,Mse_N_D(:,3), 'LineWidth',1);
     semilogy(Omega,Mse_N_Ds(:,3), 'LineWidth',1);
@@ -243,13 +239,11 @@ set(gca, 'YScale', 'log');
     semilogy(Omega,Mse_S_Ds(:,3), 'LineWidth',1);
     semilogy(Omega,Mse_S_L(:,3), 'LineWidth',1);
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\sum_{i=1}^N (\theta^3 - \hat \theta_i^3)^2/N$','Interpreter','latex');
 hold off
 
 h=subplot(3,2,6);
 hold on
 set(gca, 'YScale', 'log');
-title("Semilog plot of Percent Error (MSE) in $\hat \theta^4$",'Interpreter','latex','Fontsize',14 )
     semilogy(Omega,Mse_N_D(:,4), 'LineWidth',1);
     semilogy(Omega,Mse_N_Ds(:,4), 'LineWidth',1);
     semilogy(Omega,Mse_N_L(:,4), 'LineWidth',1);
@@ -257,7 +251,6 @@ title("Semilog plot of Percent Error (MSE) in $\hat \theta^4$",'Interpreter','la
     semilogy(Omega,Mse_S_Ds(:,4), 'LineWidth',1);
     semilogy(Omega,Mse_S_L(:,4), 'LineWidth',1);
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\sum_{i=1}^N (\theta^4 - \hat \theta_i^4)^2/N$','Interpreter','latex');
 hold off
 
 saveas(fig,'500x8 Comparison Plots.png');
