@@ -83,8 +83,6 @@ for i=1:size(u1_grid,1)
         %[i j]
         g_roots1=@(x_1) g_func1(x_1,u1_grid(i,j),u2_grid(i,j));
         [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
-        sigma=0.1;
-        
         
         if (x1_low==x1_mid&&x1_mid==x1_high)
             xyz_stable_1=[xyz_stable_1; [u1_grid(i,j) u2_grid(i,j) x1_low]];

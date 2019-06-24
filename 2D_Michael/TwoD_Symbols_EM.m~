@@ -1,21 +1,19 @@
-function q = ExpectationMax(XYZ,uGrid1,uGrid2,obj,theta,numTrials)
-    tmp=0;
-    
+function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
     addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
     close all  
     
-    u1_syms=[];
-    u2_syms=[];
-    x1_syms=zeros(size(uGrid1,1),size(uGrid2,2),numTrials);
-    x2_syms=zeros(size(uGrid1,1),size(uGrid2,2),numTrials);
+    u1_syms=cell(size(uGrid1,1),size(uGrid2,2));
+    u2_syms=cell(size(uGrid1,1),size(uGrid2,2));
+    x1_syms=cell(size(uGrid1,1),size(uGrid2,2),numTrials);
+    x2_syms=cell(size(uGrid1,1),size(uGrid2,2),numTrials);
     for i=1:size(uGrid1,1)
         for j=1:size(uGrid2,2)
-            u1_syms=[u1_syms SX.sym(strcat('u1_syms_',num2str(i),'_',num2str(j)))];
-            u2_syms=[u2_syms SX.sym(strcat('u2_syms_',num2str(i),'_',num2str(j)))];
+            u1_syms{i,j}=SX.sym(strcat('u1_syms_',num2str(i),'_',num2str(j)));
+            u2_syms{i,j}=SX.sym(strcat('u2_syms_',num2str(i),'_',num2str(j)));
             for k=1:numTrials
-                x1_syms(i,j,k) = SX.sym(strcat('x1_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
-                x2_syms(i,j,k) = SX.sym(strcat('x2_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
+                x1_syms{i,j,k} = SX.sym(strcat('x1_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
+                x2_syms{i,j,k} = SX.sym(strcat('x2_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
             end
         end
     end
@@ -36,6 +34,8 @@ function q = ExpectationMax(XYZ,uGrid1,uGrid2,obj,theta,numTrials)
 
     u1_sym = SX.sym('u1_sym');
     u2_sym = SX.sym('u2_sym');
+    u_sym=[u1_sym u2_sym];
+    
     Omega_sym = SX.sym('Omega_sym');
 
     alpha1_sym = SX.sym('alpha1_sym');
@@ -58,6 +58,10 @@ function q = ExpectationMax(XYZ,uGrid1,uGrid2,obj,theta,numTrials)
     g1 = alpha1_sym + beta1_sym./(1+((x2_sym./K2_sym)*(1./(1+(u2_sym./kappa2_sym).^m2_sym))).^n1_sym)-x1_sym;
     g2 = alpha2_sym + beta2_sym./(1+((x1_sym./K1_sym)*(1./(1+(u1_sym./kappa1_sym).^m1_sym))).^n2_sym)-x2_sym;
 
+    
+    g1_func = Function('g1_func',{theta_sym,u_sym,x_sym},{g1});
+    g2_func = Function('g1_func',{theta_sym,u_sym,x_sym},{g2});
+    
     g=[g1 g2];
     
     mu_1 = SX.sym('mu_1');
@@ -75,45 +79,80 @@ function q = ExpectationMax(XYZ,uGrid1,uGrid2,obj,theta,numTrials)
     gaussian = ((2*pi*detC)^(-1))*exp(-0.5*qForm);
     gauss_func = Function('gaussian',{mu_sym,covar_sym,x_sym},{gaussian});
     
-    optimSyms = [];
-    linear_constraints = [];
-    linear_constraint_UB=[];
-    linear_constraint_LB=[];
+    optimSyms = theta_sym;
+    
+    lUB=[];
+    lLB=[];
+    
+    nlC={};
+    nlUB=[];
+    nlLB=[];
+    
     QFunc=0;
     for i=1:size(u1_syms,1)
-        for j=1:size(u2_syms,2)
-            
+        for j=1:size(u2_syms,2)           
             xstar_top_1_ij = SX.sym(strcat('xstar_top_1_',num2str(i),'_',num2str(j)));
+            optimSyms=[optimSyms; xstar_top_1_ij];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf];
             xstar_top_2_ij = SX.sym(strcat('xstar_top_2_',num2str(i),'_',num2str(j)));
+            optimSyms=[optimSyms; xstar_top_2_ij];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf];
             xstar_bot_1_ij = SX.sym(strcat('xstar_bot_1_',num2str(i),'_',num2str(j)));
+            optimSyms=[optimSyms; xstar_bot_1_ij];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf];
             xstar_bot_2_ij = SX.sym(strcat('xstar_bot_2_',num2str(i),'_',num2str(j)));
+            optimSyms=[optimSyms; xstar_bot_2_ij];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf];
             
             covar_ij_top = [SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_11'))...
                             SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_12'))...
                             SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_21'))...
                             SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_22'))];
             logdetCij_top = detC_func(covar_ij_top(1),covar_ij_top(2),covar_ij_top(3),covar_ij_top(4));
+            optimSyms=[optimSyms; covar_ij_top];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf]; 
             
             covar_ij_bot = [SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_11'))...
                             SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_12'))...
                             SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_21'))...
                             SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_22'))];
             logdetCij_bot = detC_func(covar_ij_bot(1),covar_ij_bot(2),covar_ij_bot(3),covar_ij_bot(4));
+            optimSyms=[optimSyms; covar_ij_bot];
+            lUB = [lUB; inf];
+            lLB = [lLB; -inf];
             
             w_ij_top=SX.sym(strcat('w_',num2str(i),'_',num2str(j),'_top'));
+            optimSyms=[optimSyms; w_ij_top];
+            lUB=[lUB;inf];
+            lLB=[lLB;0];
             w_ij_bot=SX.sym(strcat('w_',num2str(i),'_',num2str(j),'_bot'));
-            
-            optimSyms=[optimSyms w_ij_top w_ij_bot covar_ij_top covar_ij_bot...
-                xstar_top_1_ij xstar_top_2_ij xstar_bot_1_ij xstar_bot_2_ij];
+            optimSyms=[optimSyms; w_ij_bot];
+            lUB=[lUB;inf];
+            lLB=[lLB;0];
             
             wSum = w_ij_top + w_ij_bot;
-            linear_constraints=[linear_constraints wSum];
-            linear_constraint_UB=[linear_constraint_UB;1];
-            linear_constraint_LB=[linear_constraint_LB;1];
+            nlC={linear_constraints, wSum};
+            nlUB=[lUB;1];
+            nlLB=[lLB;1];     
+            
+            gStar1 = g1_func(theta_sym, [u1_syms{i,j} u2_syms{i,j}], [xstar_top_1_ij xstar_bot_1_ij]);
+            gStar2 = g2_func(theta_sym, [u1_syms{i,j} u2_syms{i,j}], [xstar_top_2_ij xstar_bot_2_ij]);
+            
+            nlC = {nlC, gStar1};
+            nlUB = [nlUB; 0];
+            nlLB = [nlLB; 0];
+            nlC = {nlC, gStar2};
+            nlUB = [nlUB; 0];
+            nlLB = [nlLB; 0];
             
             for k=1:numTrials
-                gau_top = gauss_func([xstar_top_1_ij xstar_top_2_ij], covar_ij_top, [x1_syms(i,j,k) x2_syms(i,j,k)]);
-                gau_bot = gauss_func([xstar_bot_1_ij xstar_bot_2_ij], covar_ij_bot, [x1_syms(i,j,k) x2_syms(i,j,k)]);
+                gau_top = gauss_func([xstar_top_1_ij xstar_top_2_ij], covar_ij_top, [x1_syms{i,j,k} x2_syms{i,j,k}]);
+                gau_bot = gauss_func([xstar_bot_1_ij xstar_bot_2_ij], covar_ij_bot, [x1_syms{i,j,k} x2_syms{i,j,k}]);
                 
                 weight_top = w_ij_top*gau_top/(w_ij_top*gau_top+w_ij_bot*gau_bot);
                 weight_bot = w_ij_bot*gau_bot/(w_ij_top*gau_top+w_ij_bot*gau_bot);
@@ -121,27 +160,21 @@ function q = ExpectationMax(XYZ,uGrid1,uGrid2,obj,theta,numTrials)
                 TermOne = weight_top*(log(w_ij_top)-0.5*logdetCij_top)+weight_bot*(log(w_ij_bot)-0.5*logdetCij_bot);
                 
                 TermTwo = -0.5*...
-                    (weight_top*(covar_ij_top(1)*(xstar_top_1_ij - x1_syms(i,j,k))^2 + covar_ij_top(4)*(xstar_top_2_ij-x2_syms(i,j,k))^2 +...
-                    (covar_ij_top(2)+covar_ij_top(3))*(xstar_top_1_ij-x1_syms(i,j,k))*(xstar_top_2_ij-x2_syms(i,j,k)))+...
-                    weight_bot*(covar_ij_bot(1)*(xstar_bot_1_ij - x1_syms(i,j,k))^2 + covar_ij_bot(4)*(xstar_bot_2_ij-x2_syms(i,j,k))^2 +...
-                    (covar_ij_bot(2)+covar_ij_bot(3))*(xstar_bot_1_ij-x1_syms(i,j,k))*(xstar_bot_2_ij-x2_syms(i,j,k))));
+                    (weight_top*(covar_ij_top(1)*(xstar_top_1_ij - x1_syms{i,j,k})^2 + covar_ij_top(4)*(xstar_top_2_ij-x2_syms{i,j,k})^2 +...
+                    (covar_ij_top(2)+covar_ij_top(3))*(xstar_top_1_ij-x1_syms{i,j,k})*(xstar_top_2_ij-x2_syms{i,j,k}))+...
+                    weight_bot*(covar_ij_bot(1)*(xstar_bot_1_ij - x1_syms{i,j,k})^2 + covar_ij_bot(4)*(xstar_bot_2_ij-x2_syms{i,j,k})^2 +...
+                    (covar_ij_bot(2)+covar_ij_bot(3))*(xstar_bot_1_ij-x1_syms{i,j,k})*(xstar_bot_2_ij-x2_syms{i,j,k})));
                 
                 QFunc=QFunc+TermOne+TermTwo;
             end
         end
     end
     QFunc=-QFunc;
+    nlp = struct('x', optimSyms, 'f', QFunc, 'g', nlC, 'p', p);
+    solver = n
+    %qFunc = Function({optimSyms,u1_syms,u2_syms,x1_syms,x2_syms},{QFunc});
     
-    
-%     g_x=jacobian(g,x_sym);
-%     g_x_func = Function('g_x_func', {x_sym,u1_sym,u2_sym,theta_sym}, {g_x});
-% 
-%     g_u_func = Function('g_u_func', {x_sym,u_sym,theta_sym}, {g_u});
-%     g_theta=jacobian(g,theta_sym);
-%     g1_x=jacobian(g1,x_sym);
-%     g2_x=jacobian(g2,x_sym);
-%     g_u=jacobian(g,u_sym);
-    
-    
-
+    %syms=struct('QFunc',,'lin_cons',linear_constraints,'lin_UB',linear_constraints_UB,...
+    %    'lin_LB',linear_constraints_LB,'nl_cons',nonlinear_constraints,'nl_UB',nonlinear_constraints_UB,...
+    %    'nl_LB',nonlinear_constraints_LB,'optimsyms',optimSyms);
 end
