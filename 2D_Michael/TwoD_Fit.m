@@ -32,9 +32,8 @@ B_func=@(x,u_1,u_2) [alpha_1 + beta_1./(1+((x(2)./K_2)*(1./(1+(u_2./kappa_2).^m_
 
 umax_1=1;
 umax_2=100;
-[u1_grid,u2_grid] = meshgrid(0:0.05:umax_1,0:5:umax_2);
+[u1_grid,u2_grid] = meshgrid(0:0.1:umax_1,0:10:umax_2);
 numTrials=20;
-
 sy = TwoD_Symbols_EM(u1_grid,u2_grid,numTrials);
 solver = nlpsol('solver','ipopt',sy.nlp);
 
@@ -58,8 +57,8 @@ for i=1:size(u1_grid,1)
         x2_low=x2_null(x1_low,u1_grid(i,j));
         x2_high=x2_null(x1_high,u1_grid(i,j));
         
-        x1vals=[x1vals; s(1,:)];
-        x2vals=[x1vals; s(2,:)];
+        x1vals=[x1vals; s(:,1)];
+        x2vals=[x2vals; s(:,2)];
         u1vals=[u1vals;u1_grid(i,j)];
         u2vals=[u2vals;u2_grid(i,j)];
         
@@ -84,6 +83,6 @@ for i=1:size(u1_grid,1)
 end
 dataSet=[x1vals;x2vals;u1vals;u2vals];
 
-Fit=solver('x0',x0,'lbx',sy.lbx,'ubx',sy.ubx,'lbg',sy.lbg,'ubg',sy.ubg,'p',dataSet);
+%Fit=solver('x0',x0,'lbx',sy.lbx,'ubx',sy.ubx,'lbg',sy.lbg,'ubg',sy.ubg,'p',dataSet);
 
 disp('test');

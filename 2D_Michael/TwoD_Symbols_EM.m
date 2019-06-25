@@ -79,10 +79,10 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
     gaussian = ((2*pi*detC)^(-1))*exp(-0.5*qForm);
     gauss_func = Function('gaussian',{mu_sym,covar_sym,x_sym},{gaussian});
     
-    optimSyms = theta_sym';
+    optimSyms = {alpha1_sym, alpha2_sym, beta1_sym, beta2_sym, K1_sym, K2_sym, n1_sym, n2_sym, kappa1_sym, kappa2_sym, m1_sym, m2_sym};
     
-    lUB=[];
-    lLB=[];
+    lUB=[inf;inf;inf;inf;inf;inf;inf;inf;inf;inf;inf;inf];
+    lLB=[-inf;-inf;-inf;-inf;-inf;-inf;-inf;-inf;-inf;-inf;-inf;-inf];
     
     nlC={};
     nlUB=[];
@@ -92,19 +92,19 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
     for i=1:size(u1_syms,1)
         for j=1:size(u2_syms,2)           
             xstar_top_1_ij = SX.sym(strcat('xstar_top_1_',num2str(i),'_',num2str(j)));
-            optimSyms=[optimSyms; xstar_top_1_ij];
+            optimSyms={optimSyms{:}, xstar_top_1_ij};
             lUB = [lUB; inf];
             lLB = [lLB; -inf];
             xstar_top_2_ij = SX.sym(strcat('xstar_top_2_',num2str(i),'_',num2str(j)));
-            optimSyms=[optimSyms; xstar_top_2_ij];
+            optimSyms={optimSyms{:}, xstar_top_2_ij};
             lUB = [lUB; inf];
             lLB = [lLB; -inf];
             xstar_bot_1_ij = SX.sym(strcat('xstar_bot_1_',num2str(i),'_',num2str(j)));
-            optimSyms=[optimSyms; xstar_bot_1_ij];
+            optimSyms={optimSyms{:}, xstar_bot_1_ij};
             lUB = [lUB; inf];
             lLB = [lLB; -inf];
             xstar_bot_2_ij = SX.sym(strcat('xstar_bot_2_',num2str(i),'_',num2str(j)));
-            optimSyms=[optimSyms; xstar_bot_2_ij];
+            optimSyms={optimSyms{:}, xstar_bot_2_ij};
             lUB = [lUB; inf];
             lLB = [lLB; -inf];
             
@@ -113,7 +113,7 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
                             SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_21'))...
                             SX.sym(strcat('covarT_',num2str(i),'_',num2str(j),'_22'))];
             logdetCij_top = detC_func(covar_ij_top(1),covar_ij_top(2),covar_ij_top(3),covar_ij_top(4));
-            optimSyms=[optimSyms; covar_ij_top'];
+            optimSyms={optimSyms{:}, covar_ij_top(1),covar_ij_top(2),covar_ij_top(3),covar_ij_top(4)};
             lUB = [lUB; inf; inf; inf; inf];
             lLB = [lLB; -inf; -inf; -inf; -inf];
             
@@ -122,31 +122,31 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
                             SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_21'))...
                             SX.sym(strcat('covarB_',num2str(i),'_',num2str(j),'_22'))];
             logdetCij_bot = detC_func(covar_ij_bot(1),covar_ij_bot(2),covar_ij_bot(3),covar_ij_bot(4));
-            optimSyms=[optimSyms; covar_ij_bot'];
+            optimSyms={optimSyms{:}, covar_ij_bot(1),covar_ij_bot(2),covar_ij_bot(3),covar_ij_bot(4)};
             lUB = [lUB; inf; inf; inf; inf];
             lLB = [lLB; -inf; -inf; -inf; -inf];
             
             w_ij_top=SX.sym(strcat('w_',num2str(i),'_',num2str(j),'_top'));
-            optimSyms=[optimSyms; w_ij_top];
+            optimSyms={optimSyms{:}, w_ij_top};
             lUB=[lUB;inf];
             lLB=[lLB;0];
             w_ij_bot=SX.sym(strcat('w_',num2str(i),'_',num2str(j),'_bot'));
-            optimSyms=[optimSyms; w_ij_bot];
+            optimSyms={optimSyms{:}, w_ij_bot};
             lUB=[lUB;inf];
             lLB=[lLB;0];
             
             wSum = w_ij_top + w_ij_bot;
-            nlC={nlC, wSum};
-            nlUB=[lUB;1];
-            nlLB=[lLB;1];     
+            nlC=[nlC, {wSum}];
+            nlUB=[nlUB;1];
+            nlLB=[nlLB;1];     
             
             gStar1 = g1_func(theta_sym, [u1_syms{i,j} u2_syms{i,j}], [xstar_top_1_ij xstar_bot_1_ij]);
             gStar2 = g2_func(theta_sym, [u1_syms{i,j} u2_syms{i,j}], [xstar_top_2_ij xstar_bot_2_ij]);
             
-            nlC = {nlC, gStar1};
+            nlC = [nlC, {gStar1}];
             nlUB = [nlUB; 0];
             nlLB = [nlLB; 0];
-            nlC = {nlC, gStar2};
+            nlC = [nlC, {gStar2}];
             nlUB = [nlUB; 0];
             nlLB = [nlLB; 0];
             
@@ -175,6 +175,7 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
     p = [p; vertcat(u1_syms{:})];
     p = [p; vertcat(u2_syms{:})];
     QFunc=-QFunc;
-    nlp = struct('x', optimSyms, 'f', QFunc, 'g', nlC, 'p', p);
-    syms = struct('nlp',nlp,'lbx',lLB,'ubx',lUB,'lbg',nlLB,'ubg',nlUB);
+    q=Function('q',{vertcat(optimSyms{:}),p},{QFunc});
+    nlp = struct('x', vertcat(optimSyms{:}), 'f', QFunc, 'g', vertcat(nlC{:}), 'p', p);
+    syms = struct('nlp',nlp,'lbx',lLB,'ubx',lUB,'lbg',nlLB,'ubg',nlUB,'qfunc',q);
 end
