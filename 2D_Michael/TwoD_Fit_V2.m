@@ -13,15 +13,15 @@ for i=1:size(u1_grid,1)
     for j=1:size(u2_grid,2)
         s = dlmread(strcat('2D_Michael/Data/SSAData_',num2str(i),'_',num2str(j)),'\t');
         SSAData{i,j}=s;        
-        x1vals=[x1vals; s(:,1)];
-        x2vals=[x2vals; s(:,2)];
-        u1vals=[u1vals;u1_grid(i,j)];
-        u2vals=[u2vals;u2_grid(i,j)];
+        x1vals=[x1vals; s(:,2)];
+        x2vals=[x2vals; s(:,1)];
+        u1vals=[u1vals;u2_grid(i,j)];
+        u2vals=[u2vals;u1_grid(i,j)];
     end
 end
 
-covar_1=eye(2);
-covar_2=eye(2);
+covar_1=eye(2)*100;
+covar_2=eye(2)*100;
 w1=1/2;
 w2=1/2;
 
@@ -39,8 +39,17 @@ m_1= 2.00;
 m_2 = 2.00;
 
 theta_true=[alpha_1 alpha_2 beta_1 beta_2 K_1 K_2 n_1 n_2 kappa_1 kappa_2 m_1 m_2];
+x0={theta_true,covar_1(1,1),covar_1(1,2),covar_1(2,2),covar_2(1,1),covar_2(1,2),covar_2(2,2),w1,w2};
+x0=vertcat([x0{:}]);
 
-expectationStep(u1vals,u2vals,x1vals,x2vals,theta_true,covar_1(1,1),covar_1(1,2),covar_1(2,2),covar_2(1,1),covar_2(1,2),covar_2(2,2),w1,w2)
+obj = @(x)EW(x,u1vals,u2vals,x1vals,x2vals);
+
+options=optimset('Display','iter');
+fminsearch(obj,x0,options);
+
+function E=EW(x,uVals1,uVals2,xVals1,xVals2)
+    E=expectationStep(uVals1,uVals2,xVals1,xVals2,[x(1),x(2),x(3),x(4),x(5),x(6),x(7),x(8),x(9),x(10),x(11),x(12)],x(13),x(14),x(15),x(16),x(17),x(18),x(19),x(20));
+end
 
 function ex=expectationStep(u1_grid,u2_grid,x1_vals,x2_vals,theta_guess,covar_1_11,covar_1_12,covar_1_22,covar_2_11,covar_2_12,covar_2_22,w1,w2)
     %u0_1=0.25;
@@ -76,7 +85,7 @@ function ex=expectationStep(u1_grid,u2_grid,x1_vals,x2_vals,theta_guess,covar_1_
    
     tmp=0;
     for i=1:size(u1_grid,1)
-        disp(strcat('i = ',num2str(i)));
+        %disp(strcat('i = ',num2str(i)));
         for j=1:size(u2_grid,2)
             co_1=[[covar_1_11 covar_1_12];[covar_1_12 covar_1_22]];
             co_2=[[covar_2_11 covar_2_12];[covar_2_12 covar_2_22]];
@@ -92,7 +101,7 @@ function ex=expectationStep(u1_grid,u2_grid,x1_vals,x2_vals,theta_guess,covar_1_
                
                 tmp=tmp-0.5*log10(det(co_1));
                 
-                X=[x1_vals(i,j), x2_vals(i,j)]-[x1_high, x2_high];
+                X=[x1_vals(i,j), x2_vals(i,j)]-[x1_low, x2_low];
                 tmp=tmp-0.5*X*(co_1\X');  
             else
                 xyz_stable_1=[xyz_stable_1; [u1_grid(i,j) u2_grid(i,j) x1_low]];
@@ -126,5 +135,5 @@ function ex=expectationStep(u1_grid,u2_grid,x1_vals,x2_vals,theta_guess,covar_1_
             
         end
     end
-    ex=tmp;
+    ex=-tmp;
 end
