@@ -90,7 +90,7 @@ for i=1:size(u1_grid,1)
             x2_low=x2_null(x1_low,u1_grid(i,j));
             xyz_stable_2=[xyz_stable_2; [u1_grid(i,j) u2_grid(i,j) x2_low]];
             
-            A=full(g_x_func([x1_strt x2_strt],u_strt(1),u_strt(2),theta));
+            A=full(g_x_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j),theta));
             B=B_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j));
             C = lyap(A,B);
             
@@ -104,6 +104,10 @@ for i=1:size(u1_grid,1)
             x2_low=x2_null(x1_low,u1_grid(i,j));
             x2_mid=x2_null(x1_mid,u1_grid(i,j));
             x2_high=x2_null(x1_high,u1_grid(i,j));
+            
+            A=full(g_x_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j),theta));
+            B=B_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j));
+            C = lyap(A,B);
             
             xyz_stable_2=[xyz_stable_2; [u1_grid(i,j) u2_grid(i,j) x2_low]];
             xyz_unstable_2=[xyz_unstable_2; [u1_grid(i,j) u2_grid(i,j) x2_mid]];
