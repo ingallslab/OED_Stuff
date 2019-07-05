@@ -12,8 +12,8 @@ function syms = TwoD_Symbols_EM(uGrid1,uGrid2,numTrials)
             u1_syms{i,j}=SX.sym(strcat('u1_syms_',num2str(i),'_',num2str(j)));
             u2_syms{i,j}=SX.sym(strcat('u2_syms_',num2str(i),'_',num2str(j)));
             for k=1:numTrials
-                x1_syms{i,j,k} = SX.sym(strcat('x1_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
-                x2_syms{i,j,k} = SX.sym(strcat('x2_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
+                x1_syms{j,i,k} = SX.sym(strcat('x1_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
+                x2_syms{j,i,k} = SX.sym(strcat('x2_syms_',num2str(i),'_',num2str(j),'_',num2str(k)));
             end
         end
     end

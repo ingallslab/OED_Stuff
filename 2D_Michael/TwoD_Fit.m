@@ -67,15 +67,15 @@ for i=1:size(u1_grid,1)
         x0=[x0; x1_low];
         x0=[x0; x2_low];
         
-        x0=[x0; 1];  %  covariance matrix
+        x0=[x0; 100];  %  covariance matrix
         x0=[x0; 0];
         x0=[x0; 0];
-        x0=[x0; 1];
+        x0=[x0; 100];
         
-        x0=[x0; 1];  %  covariance matrix
+        x0=[x0; 100];  %  covariance matrix
         x0=[x0; 0];
         x0=[x0; 0];
-        x0=[x0; 1];
+        x0=[x0; 100];
         
         x0=[x0;0.5]; %  distribution weighting
         x0=[x0;0.5];
@@ -83,4 +83,4 @@ for i=1:size(u1_grid,1)
 end
 dataSet=[x1vals;x2vals;u1vals;u2vals];
 
-Fit=solver('x0',x0,'lbx',sy.lbx,'ubx',sy.ubx,'lbg',sy.lbg,'ubg',sy.ubg,'p',dataSet)
+Fit=solver('x0',x0,'lbx',sy.lbx,'ubx',sy.ubx,'lbg',sy.lbg,'ubg',sy.ubg,'p',dataSet);
