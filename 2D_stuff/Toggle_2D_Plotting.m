@@ -1,4 +1,4 @@
-addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
 import casadi.*
 close all  
 
@@ -89,7 +89,7 @@ xyz_unstable_1=[];
 xyz_unstable_2=[];
 
 for i=1:size(u1_grid,1)
-    i
+    disp(strcat('i = ',num2str(i)));
     for j=1:size(u2_grid,2)
         %[i j]
         g_roots1=@(x_1) g_func1(x_1,u1_grid(i,j),u2_grid(i,j));
@@ -340,7 +340,7 @@ end
 
 function ll=logLik(x,u,theta,gamma,Phi)
 
-    addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+    addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
     import casadi.*
 
     x1_sym = SX.sym('x1_sym');

@@ -1,3 +1,24 @@
+umax_1=1;
+umax_2=100;
+uVals = 0:0.05:1;
+OMEGA=0.01;
+
+phi_1=[0.45 0];
+phi_2=[0 45];
+
+Phi=[phi_1;phi_2];
+
+finTime = 5000;
+num = 5000;
+SSAData=cell(size(u1_grid,1),size(u1_grid,2));
+parfor i=1:length(uVals)
+    u1 = uVals(i);
+    uV = (phi_2-phi_1)*u1+phi_1;
+    u1 = uV(1);
+    u2 = uV(2);
+    SSAData{i} = Toggle_Ensemble([0.1,0.1],[u1 u2],OMEGA,finTime,num);
+    dlmwrite(strcat('2D_Michael/Data/SliceData_Omega=0.01_u=',num2str(u1)),SSAData{i},'\t');
+end
 function Yend=Toggle_Ensemble(initX,u_vals,OMEGA,finTime,num)
     %initX = initial points
     %u_vals = inputs to simulate

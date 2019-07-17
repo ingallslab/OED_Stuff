@@ -99,7 +99,7 @@ for i=1:size(Norm_L_90,1)
     nMSEl_90=nMSEl_90+(theta_t - Norm_L_90(i,:)).*(theta_t - Norm_L_90(i,:))/size(Norm_L_90,1);
 end
 
-mse_90 = [norm(sMSEd_90);norm(sMSEds_90);norm(sMSEl_90);norm(nMSEd_90);norm(nMSEds_90);norm(nMSEl_90)];
+mse_90 = 100*[(sMSEd_90)./theta_t;(sMSEds_90)./theta_t;(sMSEl_90)./theta_t;(nMSEd_90)./theta_t;(nMSEds_90)./theta_t;(nMSEl_90)./theta_t];
 %%
 biases_60 = [norm(ndm_60-theta_t);norm(ndsm_60-theta_t);norm(nlm_60-theta_t);...
     norm(sdm_60-theta_t);norm(sdsm_60-theta_t);norm(slm_60-theta_t)];
@@ -130,7 +130,7 @@ for i=1:size(Norm_L_60,1)
     nMSEl_60=nMSEl_60+(theta_t - Norm_L_60(i,:)).*(theta_t - Norm_L_60(i,:))/size(Norm_L_60,1);
 end
 
-mse_60 = [norm(sMSEd_60);norm(sMSEds_60);norm(sMSEl_60);norm(nMSEd_60);norm(nMSEds_60);norm(nMSEl_60)];
+mse_60 = 100*[(sMSEd_60)./theta_t;(sMSEds_60)./theta_t;(sMSEl_60)./theta_t;(nMSEd_60)./theta_t;(nMSEds_60)./theta_t;(nMSEl_60)./theta_t];
 %%
 biases_120 = [norm(ndm_120-theta_t);norm(ndsm_120-theta_t);norm(nlm_120-theta_t);...
     norm(sdm_120-theta_t);norm(sdsm_120-theta_t);norm(slm_120-theta_t)];
@@ -161,46 +161,103 @@ for i=1:size(Norm_L_120,1)
     nMSEl_120=nMSEl_120+(theta_t - Norm_L_120(i,:)).*(theta_t - Norm_L_120(i,:))/size(Norm_L_120,1);
 end
 
-mse_120 = [norm(sMSEd_120);norm(sMSEds_120);norm(sMSEl_120);norm(nMSEd_120);norm(nMSEds_120);norm(nMSEl_120)];
+mse_120 = 100*[(sMSEd_120)./theta_t;(sMSEds_120)./theta_t;(sMSEl_120)./theta_t;(nMSEd_120)./theta_t;(nMSEds_120)./theta_t;(nMSEl_120)./theta_t];
 %%
-disp(biases_60');
-disp(biases_90');
-disp(biases_120');
-disp(covariances_60');
-disp(covariances_90');
-disp(covariances_120');
+% disp(biases_60');
+% disp(biases_90');
+% disp(biases_120');
+% disp(covariances_60');
+% disp(covariances_90');
+% disp(covariances_120');
+% disp(mse_60);
+% disp(mse_90);
+% disp(mse_120);
+Mse_S_D =  ([mse_60(1,:);mse_90(1,:);mse_120(1,:)])
+Mse_S_Ds = ([mse_60(2,:);mse_90(2,:);mse_120(2,:)])
+Mse_S_L =  ([mse_60(3,:);mse_90(3,:);mse_120(3,:)])
+Mse_N_D =  ([mse_60(4,:);mse_90(4,:);mse_120(4,:)])
+Mse_N_Ds = ([mse_60(5,:);mse_90(5,:);mse_120(5,:)])
+Mse_N_L =  ([mse_60(6,:);mse_90(6,:);mse_120(6,:)])
 
 Omega = [60 90 120];
 biases = [biases_60 biases_90 biases_120];
 covars = [covariances_60 covariances_90 covariances_120];
 mses = [mse_60 mse_90 mse_120];
-fig=figure('Renderer', 'painters', 'Position', [10 10 900 800])
-f = subplot(2,2,1);
+fig=figure('Renderer', 'painters', 'Position', [10 10 900 800]);
+f = subplot(3,2,1);
 hold on
 for i=1:size(biases,1)
-    plot(Omega,biases(i,:));
+    plot(Omega,biases(i,:), 'LineWidth',1);
 end
 title("Norm-Bias versus System Size ($\|\theta - \sum_{i=1}^N\hat{\theta_i}/N\|$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
 xlabel('$\Omega$','Interpreter','latex');
 ylabel('$\|\theta - \sum_{i=1}^N\hat{\theta_i}/N\|$','Interpreter','latex');
 hold off
-g = subplot(2,2,2);
+g = subplot(3,2,2);
 hold on
 for i=1:size(covars,1)
-    plot(Omega,log10(covars(i,:)));
+    set(gca, 'YScale', 'log');
+    semilogy(Omega,(covars(i,:)), 'LineWidth',1);
 end
 title("Log-Covariance versus System Size ($\log_{10}(|\textrm{Cov}(\hat\theta)|)$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\log_{10}(|\textrm{Cov}(\hat\theta)|)$','Interpreter','latex');
+ylabel('$|\textrm{Cov}(\hat\theta)|$','Interpreter','latex');
 legend('Norm D','Norm Ds', 'Norm L', 'SSA D', 'SSA Ds', 'SSA L');
 hold off
-h=subplot(2,2,[3,4]);
+h=subplot(3,2,3);
 hold on
-for i=1:size(mses,1)
-    plot(Omega,log10(mses(i,:)));
-end
-title("Mean-Squared Error versus System Size ($\sum_{i=1}^N\|\theta-\hat\theta_i\|^2/N$ versus $\Omega$)",'Interpreter','latex','Fontsize',14 )
+title("Semilog plot of Percent Error (MSE) in $\hat \theta^1$",'Interpreter','latex','Fontsize',14 )
+    set(gca, 'YScale', 'log');
+    semilogy(Omega,Mse_N_D(:,1), 'LineWidth',1);
+    semilogy(Omega,Mse_N_Ds(:,1), 'LineWidth',1);
+    semilogy(Omega,Mse_N_L(:,1), 'LineWidth',1);
+    semilogy(Omega,Mse_S_D(:,1), 'LineWidth',1);
+    semilogy(Omega,Mse_S_Ds(:,1), 'LineWidth',1);
+    semilogy(Omega,Mse_S_L(:,1), 'LineWidth',1);
 xlabel('$\Omega$','Interpreter','latex');
-ylabel('$\sum_{i=1}^N\|\theta-\hat\theta_i\|^2/N$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N (\theta^1 - \hat \theta_i^1)^2/N$','Interpreter','latex');
 hold off
+
+h=subplot(3,2,4);
+hold on
+title("Semilog plot of Percent Error (MSE) in $\hat \theta^2$",'Interpreter','latex','Fontsize',14 )
+set(gca, 'YScale', 'log');
+    semilogy(Omega,Mse_N_D(:,2), 'LineWidth',1);
+    semilogy(Omega,Mse_N_Ds(:,2), 'LineWidth',1);
+    semilogy(Omega,Mse_N_L(:,2), 'LineWidth',1);
+    semilogy(Omega,Mse_S_D(:,2), 'LineWidth',1);
+    semilogy(Omega,Mse_S_Ds(:,2), 'LineWidth',1);
+    semilogy(Omega,Mse_S_L(:,2), 'LineWidth',1);
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N (\theta^2 - \hat \theta_i^2)^2/N$','Interpreter','latex');
+hold off
+
+h=subplot(3,2,5);
+hold on
+title("Semilog plot of Percent Error (MSE) in $\hat \theta^3$",'Interpreter','latex','Fontsize',14 )
+set(gca, 'YScale', 'log');
+    semilogy(Omega,Mse_N_D(:,3), 'LineWidth',1);
+    semilogy(Omega,Mse_N_Ds(:,3), 'LineWidth',1);
+    semilogy(Omega,Mse_N_L(:,3), 'LineWidth',1);
+    semilogy(Omega,Mse_S_D(:,3), 'LineWidth',1);
+    semilogy(Omega,Mse_S_Ds(:,3), 'LineWidth',1);
+    semilogy(Omega,Mse_S_L(:,3), 'LineWidth',1);
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N (\theta^3 - \hat \theta_i^3)^2/N$','Interpreter','latex');
+hold off
+
+h=subplot(3,2,6);
+hold on
+set(gca, 'YScale', 'log');
+title("Semilog plot of Percent Error (MSE) in $\hat \theta^4$",'Interpreter','latex','Fontsize',14 )
+    semilogy(Omega,Mse_N_D(:,4), 'LineWidth',1);
+    semilogy(Omega,Mse_N_Ds(:,4), 'LineWidth',1);
+    semilogy(Omega,Mse_N_L(:,4), 'LineWidth',1);
+    semilogy(Omega,Mse_S_D(:,4), 'LineWidth',1);
+    semilogy(Omega,Mse_S_Ds(:,4), 'LineWidth',1);
+    semilogy(Omega,Mse_S_L(:,4), 'LineWidth',1);
+xlabel('$\Omega$','Interpreter','latex');
+ylabel('$\sum_{i=1}^N (\theta^4 - \hat \theta_i^4)^2/N$','Interpreter','latex');
+hold off
+
 saveas(fig,'500x8 Comparison Plots.png');

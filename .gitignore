@@ -1,6 +1,7 @@
 
 Toy_Model/Data/SSA_Data_90.txt
 *.txt
+2D_Michael/Data
 <<<<<<< Updated upstream
 1D_Michael/Data
 1D_Michael/drive_W60
@@ -13,3 +14,5 @@ Toy_Model/Data/SSA_Data_90.txt
 =======
 .DS_Store
 >>>>>>> Stashed changes
+.DS_Store
+*.m~
