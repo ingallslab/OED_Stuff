@@ -228,7 +228,7 @@ function syms = TwoD_Symbols_MLE(xVals,uVals)
     p = vertcat(p(:));
     p = [p;Omega_sym];
     optimVars = [x1stars_m; x1stars_h; x1stars_l; x2stars_m; x2stars_h; x2stars_l; (par_sym)'];
-    nlp = struct('x', optimVars, 'f', -logLik_tot, 'g', cons, 'p', p);
+    nlp = struct('x', optimVars, 'f', logLik_tot, 'g', cons, 'p', p);
     
     options.error_on_fail = true;
     options.ipopt.max_iter = 20;
@@ -237,11 +237,11 @@ function syms = TwoD_Symbols_MLE(xVals,uVals)
     solver = nlpsol('solver','ipopt',nlp,options);
     
     disp('solver has generated, beginning optimization');
-    LF = Function('logLik_tot',{optimVars,p},{-logLik_tot});
+    LF = Function('logLik_tot',{optimVars,p},{logLik_tot});
     lF = @(a,b) LF(a,b); %Numerical output
     
     %This just spits out the symbols in a struct
-    syms = struct('theta_sym',theta_sym,'optimVars',optimVars, 'logLik_tot',-logLik_tot,'loglikF',...
+    syms = struct('theta_sym',theta_sym,'optimVars',optimVars, 'logLik_tot',logLik_tot,'loglikF',...
         lF,'cons',Function('cons',{optimVars,p},{cons}),...
         'lbg',lbg,'ubg',ubg,'solver',solver,'fixedparams',p,'lbw',lbw,'ubw',ubw,...
         'loglik_xH',logLik_xH_func,'lik_func',Lik_func,'cinv',Cinv_func,'cvec',Cvec_func,'Afunc',A_func,'Bfunc',B_func);
