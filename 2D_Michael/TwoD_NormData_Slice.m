@@ -1,6 +1,6 @@
 umax_1=1;
 umax_2=100;
-uVals_1=0:0.05:umax_1;
+uVals=0.05:0.1:0.95;
 [u1_grid,u2_grid] = meshgrid(0:0.05:umax_1,0:5:umax_2);
 addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
 import casadi.*
@@ -17,6 +17,7 @@ kappa_1 = 0.0906;
 kappa_2 = 11.65;    
 m_1= 2.00;     
 m_2 = 2.00;
+Omega=0.01;
 
 theta=[alpha_1 alpha_2 beta_1 beta_2 K_1 K_2 n_1 n_2 kappa_1 kappa_2 m_1 m_2];
 
@@ -76,69 +77,94 @@ phi_2=[0 45];
 Phi=[phi_1;phi_2];
 
 xyz_stable_1=[];
-xyz_stable_2=[];
+xyz_stable_2M=[];
+xyz_stable_2L=[];
+xyz_stable_2H=[];
 xyz_unstable_1=[];
 xyz_unstable_2=[];
 XYZ_stable = [];
 XYZ_unstable_high = [];
 XYZ_unstable_low = [];
-for i=1:size(u1_grid,1)
+
+for i=1:length(uVals)
     disp(strcat('i = ',num2str(i)));
-    for j=1:size(u2_grid,2)
-        %[i j]
-        g_roots1=@(x_1) g_func1(x_1,u1_grid(i,j),u2_grid(i,j));
-        [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
+    
+    u1 = uVals(i);
+    uV = (phi_2-phi_1)*u1+phi_1;
+    u1 = uV(1);
+    u2 = uV(2);
+    
+    g_roots1=@(x_1) g_func1(x_1,u1,u2);
+    [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
+    
+    if (x1_low==x1_mid&&x1_mid==x1_high)
+        xyz_stable_1M=[xyz_stable_1M; [u1 u2 x1_low]];
         
-        if (x1_low==x1_mid&&x1_mid==x1_high)
-            xyz_stable_1=[xyz_stable_1; [u1_grid(i,j) u2_grid(i,j) x1_low]];
-            
-            x2_low=x2_null(x1_low,u1_grid(i,j));
-            xyz_stable_2=[xyz_stable_2; [u1_grid(i,j) u2_grid(i,j) x2_low]];
-            
-            A=full(g_x_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j),theta));
-            B=B_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j));
-            C = lyap(A,B);
-            
-            XYZ_stable = [XYZ_stable; [u1_grid(i,j)*ones(1,numVals)' u2_grid(i,j)*ones(1,numVals)' abs(normrnd(x1_low,sqrt(C(1,1)),[1,numVals]))']];
-            XYZ_stable = [XYZ_stable; [u1_grid(i,j)*ones(1,numVals)' u2_grid(i,j)*ones(1,numVals)' abs(normrnd(x1_high,sqrt(C(1,1)),[1,numVals]))']];
-        else
-            xyz_stable_1=[xyz_stable_1; [u1_grid(i,j) u2_grid(i,j) x1_low]];
-            xyz_unstable_1=[xyz_unstable_1; [u1_grid(i,j) u2_grid(i,j) x1_mid]];
-            xyz_stable_1=[xyz_stable_1; [u1_grid(i,j) u2_grid(i,j) x1_high]];
-            
-            x2_low=x2_null(x1_low,u1_grid(i,j));
-            x2_mid=x2_null(x1_mid,u1_grid(i,j));
-            x2_high=x2_null(x1_high,u1_grid(i,j));
-            
-            A=full(g_x_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j),theta));
-            B=B_func([x1_low x2_low],u1_grid(i,j),u2_grid(i,j));
-            C = lyap(A,B);
-            
-            xyz_stable_2=[xyz_stable_2; [u1_grid(i,j) u2_grid(i,j) x2_low]];
-            xyz_unstable_2=[xyz_unstable_2; [u1_grid(i,j) u2_grid(i,j) x2_mid]];
-            xyz_stable_2=[xyz_stable_2; [u1_grid(i,j) u2_grid(i,j) x2_high]];
-            XYZ_stable = [XYZ_stable; [u1_grid(i,j)*ones(1,numVals)' u2_grid(i,j)*ones(1,numVals)' abs(normrnd(x1_low,sqrt(C(1,1)),[1,numVals]))']];
-            XYZ_stable = [XYZ_stable; [u1_grid(i,j)*ones(1,numVals)' u2_grid(i,j)*ones(1,numVals)' abs(normrnd(x1_high,sqrt(C(1,1)),[1,numVals]))']];
-        end
+        x2_low=x2_null(x1_low,u1);
+        xyz_stable_2M=[xyz_stable_2M; [u1 u2 x2_low]];
         
+        A= full(g_x_func([x1_low x2_low],u1,u2,theta));
+        B= B_func([x1_low x2_low],u1,u2);
+        C = lyap(A,B)/Omega;
+        
+        XYZ_stable = [XYZ_stable; [u1*ones(1,numVals)' u2*ones(1,numVals)' abs(normrnd(x1_low,sqrt(C(1,1)),[1,numVals]))']];
+        
+    else
+        xyz_stable_1=[xyz_stable_1; [u1 u2 x1_low]];
+        xyz_unstable_1=[xyz_unstable_1; [u1 u2 x1_mid]];
+        xyz_stable_1=[xyz_stable_1; [u1 u2 x1_high]];
+        
+        x2_low=x2_null(x1_high,u1);
+        x2_mid=x2_null(x1_mid,u1);
+        x2_high=x2_null(x1_low,u1);
+        
+        Ah = full(g_x_func([x1_high x2_high],u1,u2,theta));
+        Bh = B_func([x1_high x2_low],u1,u2);
+        Ch = lyap(Ah,Bh)/Omega;
+        
+        Al = full(g_x_func([x1_low x2_low],u1,u2,theta));
+        Bl = B_func([x1_low x2_high],u1,u2);
+        Cl = lyap(Al,Bl)/Omega;
+        
+        xyz_stable_2L=[xyz_stable_2L; [u1 u2 x2_low]];
+        xyz_unstable_2=[xyz_unstable_2; [u1 u2 x2_mid]];
+        xyz_stable_2H=[xyz_stable_2H; [u1 u2 x2_high]];
+        XYZ_stable = [XYZ_stable; [u1*ones(1,numVals)' u2*ones(1,numVals)' abs(normrnd(x1_low,sqrt(Cl(1,1)),[1,numVals]))']];
+        XYZ_stable = [XYZ_stable; [u1*ones(1,numVals)' u2*ones(1,numVals)' abs(normrnd(x1_high,sqrt(Ch(1,1)),[1,numVals]))']];
     end
+    
 end
 
+umax_1=1;
+umax_2=100;
+uVals = 0.05:0.1:0.95;
+OMEGA=0.1;
 
-figure
+phi_1=[0.45 0];
+phi_2=[0 45];
+
+Phi=[phi_1;phi_2];
+
+finTime = 5000;
+num = 500;
+SSAData=cell(size(u1_grid,1),size(u1_grid,2));
+xyz = [];
+for i=1:length(uVals)
+    u1 = uVals(i);
+    uV = (phi_2-phi_1)*u1+phi_1;
+    u1 = uV(1);
+    u2 = uV(2);
+    s = dlmread(strcat('2D_Michael/Data/SliceData_Omega=0.01_u=',num2str(u1)),'\t');
+    xyz = [xyz; [u1*ones(1,500)' u2*ones(1,500)' s(1:500,1) s(1:500,2)]];
+end
+
 hold on
-scatter3(XYZ_stable(:,1),XYZ_stable(:,2),XYZ_stable(:,3),'.b')
-
+scatter3(xyz(:,1), xyz(:,2), xyz(:,3),'.r');
+scatter3(XYZ_stable(:,1),XYZ_stable(:,2),XYZ_stable(:,3),'.g')
+%plot3(xyz_stable_2M(:,1),xyz_stable_2M(:,2),xyz_stable_2M(:,3),'.b')
+%plot3(xyz_stable_2L(:,1),xyz_stable_2L(:,2),xyz_stable_2L(:,3),'.r')
+%plot3(xyz_stable_2H(:,1),xyz_stable_2H(:,2),xyz_stable_2H(:,3),'.g')
+%plot3(xyz_unstable_2(:,1),xyz_unstable_2(:,2),xyz_unstable_2(:,3),'.k')
 hold off
 xlim([0 umax_1])
 ylim([0 umax_2])
-figure
-hold on
-plot3(xyz_stable_2(:,1),xyz_stable_2(:,2),xyz_stable_2(:,3),'.b')
-plot3(xyz_unstable_2(:,1),xyz_unstable_2(:,2),xyz_unstable_2(:,3),'.r')
-hold off
-xlim([0 umax_1])
-ylim([0 umax_2])
-
-
-

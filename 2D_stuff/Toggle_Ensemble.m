@@ -45,7 +45,7 @@ function Yend=Toggle_Ensemble(initX,u_vals,OMEGA,finTime,num)
     rand('state',sum(100*clock));  %Set the uniform random number generator
 
     for i=1:num
-    
+        disp(i);
         X=OMEGA*X0(i,:);%zeros(N,5000);t=zeros(1,5000);
         t=0;
 

@@ -1,4 +1,4 @@
-addpath('/Users/nbraniff/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
+addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
 import casadi.*
 close all  
 
@@ -83,6 +83,8 @@ b1 = alpha1_sym + beta1_sym./(1+((x2_sym./K2_sym)*(1./(1+(u_val_sym(2)./kappa2_s
 b2 = alpha2_sym + beta2_sym./(1+((x1_sym./K1_sym)*(1./(1+(u_val_sym(1)./kappa1_sym).^m1_sym))).^n2_sym)+x2_sym;
 B = [b1 0; 0 b2];
 A=jacobian(g,x_sym);
+A_func = Function('A_func',{x_sym,u_cntrl_sym,theta_sym},{A});
+
 C_vec=inv(kron(eye(size(A)),A)+kron(A,eye(size(A))))*vec(-B);
 C=reshape(C_vec,size(A));
 C_func = Function('C_func', {x_sym,u_cntrl_sym,theta_sym}, {C});

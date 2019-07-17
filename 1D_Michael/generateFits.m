@@ -8,7 +8,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     c_60 = [-12.1,73.8];
     c_90 = [-18.1,111.7];
     c_120= [-24.2,150.3];
-    par_true = [0.5,3,9,3,c_120];
+    par_true = [0.5,3,9,3,c_60];
     
     
     x_sym = SX.sym('x_sym');
@@ -36,7 +36,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
     pi0_func = Function('pi0_func',{par_sym,u_sym},{pi0});
     numNans=-0;
     if strcmp(options.DataSource,'SSA') 
-        if options.SystemSize == 120
+        if options.SystemSize == 60
             if strcmp(options.Optimality,'D_Optimal')
                 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)]; 
                 [u_opt, w_opt]=D_opt_c(par_true,Omega,u,FIM_comp(par_true,Omega,u,[0.1,0.2]),[0.1,0.2]);
@@ -49,7 +49,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 u_opt=u(k);
                 xVals = cell(numFits,length(u_opt));
                 for i=1:length(u_opt)
-                    path=strcat('1D_Michael/drive_W120/SSA_Data_120_u=',num2str(u_opt(i),'%1.6f'),'.txt');
+                    path=strcat('1D_Michael/drive_W60/SSA_Data_60_u=',num2str(u_opt(i),'%1.6f'),'.txt');
                     tmp = load(path,'.txt');
                     for j = 1:numFits
                         data = datasample(tmp,numSamp(i),'Replace',false);
@@ -95,7 +95,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 
                 xVals = cell(numFits,length(u_opt));
                 for i=1:length(u_opt)
-                    path=strcat('1D_Michael/drive_W120/SSA_Data_120_u=',num2str(u_opt(i),'%1.6f'),'.txt');
+                    path=strcat('1D_Michael/drive_W60/SSA_Data_60_u=',num2str(u_opt(i),'%1.6f'),'.txt');
                     tmp = load(path,'.txt');
                     for j = 1:numFits
                         data = datasample(tmp,numSamp(i),'Replace',false);
@@ -138,7 +138,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                 end 
                 xVals = cell(numFits,numExp);
                 for i=16:inc:length(u)
-                    path=strcat('1D_Michael/drive_W120/SSA_Data_120_u=',num2str(u(round(i)),'%1.6f'),'.txt');
+                    path=strcat('1D_Michael/drive_W60/SSA_Data_60_u=',num2str(u(round(i)),'%1.6f'),'.txt');
                     tmp = load(path,'.txt');
 
                     for j = 1:numFits
@@ -177,7 +177,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
         end
     end
     if strcmp(options.DataSource,'Normal')
-        if options.SystemSize == 120
+        if options.SystemSize == 60
             if strcmp(options.Optimality,'D_Optimal')
                 u = [ linspace(0,0.1,32) linspace(0.1,0.2,64) linspace(0.2,0.3,32)];
                 inc = length(u)/numExp;
@@ -216,7 +216,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                         for j=1:numFits 
                             sigmah=full(sigma_func(theta_t,Omega,u_opt(i),hpt));
                             sigmal=full(sigma_func(theta_t,Omega,u_opt(i),lpt));
-                            numHigh = round(full(pi0_func(c_120,u_opt(i)))*numSamp(i));
+                            numHigh = round(full(pi0_func(c_60,u_opt(i)))*numSamp(i));
                             numLow = numSamp(i)-numHigh;
                             xVals{j,round(i)}=[normrnd(hpt,sigmah,[numHigh,1]); normrnd(lpt,sigmal,[numLow,1])];
                         end
@@ -280,7 +280,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                         for j=1:numFits 
                             sigmah=full(sigma_func(theta_t,Omega,u_opt(i),hpt));
                             sigmal=full(sigma_func(theta_t,Omega,u_opt(i),lpt));
-                            numHigh = round(full(pi0_func(c_120,u_opt(i)))*numSamp(i));
+                            numHigh = round(full(pi0_func(c_60,u_opt(i)))*numSamp(i));
                             numLow = numSamp(i)-numHigh;
                             xVals{j,round(i)}=[normrnd(hpt,sigmah,[numHigh,1]); normrnd(lpt,sigmal,[numLow,1])];
                         end
@@ -340,7 +340,7 @@ function [nans,thetas]=generateFits(numFits, numExp, numTrials, options)
                         for j=1:numFits 
                             sigmah=full(sigma_func(theta_t,Omega,u(round(i)),hpt));
                             sigmal=full(sigma_func(theta_t,Omega,u(round(i)),lpt));
-                            numHigh = round(full(pi0_func(c_120,u(round(i))))*numTrials);
+                            numHigh = round(full(pi0_func(c_60,u(round(i))))*numTrials);
                             numLow = numTrials-numHigh;
                             xVals{j,round(i)}=[normrnd(hpt,sigmah,[numHigh,1]); normrnd(lpt,sigmal,[numLow,1])];
                         end
