@@ -1,5 +1,6 @@
 classdef OpExD_Model
-    %Primary class for OpExD package
+    %UNTITLED5 Summary of this class goes here
+    %   Detailed explanation goes here
     
     properties
         
@@ -10,9 +11,10 @@ classdef OpExD_Model
         mu_func     %Casadi function for mu, call as mu_func(theta,u)
         
         %random sample/error density model
-        y           %observation variable(s)
-        pdf         %symbolic expression for the observation probability density function of y, depends on mu, u 
+        x           %observation variable(s)
+        pdf         %symbolic expression for the observation probability density function 
         pdf_func    %Casadi function for pdf, call as pdf_func(x,theta,u)
+               
         
         %fitting and OED functions
         loglik      %symbolic expression for the model logliklihood
@@ -24,85 +26,71 @@ classdef OpExD_Model
     
     methods
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Class Constructor
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
         function obj = OpExD_Model(varargin)
           import casadi.*
-          if nargin >= 3
+          if nargin >= 4
              %set parameters (theta) and inputs (u)
-             obj.theta=varargin{2};
-             obj.u=varargin{3};
+             obj.theta=varargin{1};
+             obj.u=varargin{2};
              
-             %number of groups of observations, grouped by their
-             %distirbution (i.e. number of model cell array entries)
-             Ndist=length(varargin{1});
-             model=varargin{1};
-
-             obj.mu={};
-             obj.mu_func={};
-             obj.y={};
-             obj.pdf={};
-             
-             for i=1:Ndist
-                 
-                 dist=model{1}{1};
-                 lngth=length(model{1}{2});
-                 obj.mu(i)=model{1}{2};
-                 obj.mu_func(i)=Function('mu_func', {obj.theta,obj.u}, {obj.mu{i}});
-                 
-                 switch dist
-                     case 'Norm'
-                        dim=(sqrt(lngth+9)-3)/2;
-                         
-                        %set obs vars (1D)
-                        obj.y(i)=SX.sym('y',dim);
-                        %set logliklihood symbolics and function
-                        obj.pdf(i)= 1/sqrt(2*pi*obj.mu(2)) * exp(-(obj.y-obj.mu(1))^2./(2*obj.mu(2)));
-                        obj.pdf_func(i) = Function('pdf_func', {obj.y,obj.theta,obj.u}, {obj.pdf{i}});
-                        %set logliklihood symbolics and function
-                        obj.loglik(i) = log(obj.pdf);%-0.5*log(2*pi*obj.mu(2)) - (obj.x-obj.mu(1))^2/(2*obj.mu(2));
-                        obj.loglik_func(i) = Function('loglik', {obj.y,obj.theta,obj.u}, {obj.loglik{i}});
-                        %set FIM symbolics and function
-                        mu_theta=jacobian(obj.mu,obj.theta);
-                        obj.fim(i)=(mu_theta(1,:)'*mu_theta(1,:))./obj.mu(2)+(mu_theta(2,:)'*mu_theta(2,:))./obj.mu(2)^2;
-                        obj.fim_func(i)=Function('fim', {obj.theta,obj.u}, {obj.fim{i}});
-
-                    case 'Lognorm'
-
-                    case 'Pois'
-
-                    case 'CustomAll'
-                        %user provides expressions for pdf as well as FIM (i.e.
-                        %they take the expectation analytically
-                        obj.x = varargin{5};
-                        p=varargin{6};
-                        obj.pdf = Function('pdf', {obj.x,obj.theta,obj.u}, {p}); 
-
-                    case 'CustomPDF'
-                        %user provides expressions for pdf only, we numerically
-                        %integrate it to get the FIM
-                        obj.x = varargin{5};
-                        p=varargin{6};
-                        obj.pdf = Function('pdf', {obj.x,obj.theta,obj.u}, {p});
-                    otherwise
-                        error('Unexpected distribution type. No PDF created.')
-                 end  
-                 
-             end
-             
-             
-                        
+             %set mu symbolic and function
+             obj.mu=varargin{3};
+             obj.mu_func=Function('mu_func', {obj.theta,obj.u}, {obj.mu});
+             switch varargin{4}
+                 case 'Norm1_ConstVar'
+                    %set obs vars (1D)
+                    obj.x = SX.sym('x');
+                    %set logliklihood symbolics and function
+                    obj.pdf= 1/sqrt(2*pi*obj.mu(2)) * exp(-(obj.x-obj.mu(1))^2./(2*obj.mu(2)));
+                    obj.pdf_func = Function('pdf_func', {obj.x,obj.theta,obj.u}, {obj.pdf});
+                    %set logliklihood symbolics and function
+                    obj.loglik = log(obj.pdf);%-0.5*log(2*pi*obj.mu(2)) - (obj.x-obj.mu(1))^2/(2*obj.mu(2));
+                    obj.loglik_func = Function('loglik', {obj.x,obj.theta,obj.u}, {obj.loglik});
+                    %set FIM symbolics and function
+                    mu_theta=jacobian(obj.mu,obj.theta);
+                    obj.fim=(mu_theta(1,:)'*mu_theta(1,:))./obj.mu(2);
+                    obj.fim_func=Function('fim', {obj.theta,obj.u}, {obj.fim});
+                 case 'Norm1_MeanVar'
+                    %set obs vars (1D)
+                    obj.x = SX.sym('x');
+                    %set logliklihood symbolics and function
+                    obj.pdf= 1/sqrt(2*pi*obj.mu(2)) * exp(-(obj.x-obj.mu(1))^2./(2*obj.mu(2)));
+                    obj.pdf_func = Function('pdf_func', {obj.x,obj.theta,obj.u}, {obj.pdf});
+                    %set logliklihood symbolics and function
+                    obj.loglik = log(obj.pdf);%-0.5*log(2*pi*obj.mu(2)) - (obj.x-obj.mu(1))^2/(2*obj.mu(2));
+                    obj.loglik_func = Function('loglik', {obj.x,obj.theta,obj.u}, {obj.loglik});
+                    %set FIM symbolics and function
+                    mu_theta=jacobian(obj.mu,obj.theta);
+                    obj.fim=(mu_theta(1,:)'*mu_theta(1,:))./obj.mu(2)+(mu_theta(2,:)'*mu_theta(2,:))./obj.mu(2)^2;
+                    obj.fim_func=Function('fim', {obj.theta,obj.u}, {obj.fim});
+                case 'Norm1_UknwnVar'
+                    %NEEDED
+                case 'Log1_'
+                    %NEEDED
+                case 'Norm1_UknwnVar'
+                    %NEEDED
+                case 'Norm1_UknwnVar'
+                    %NEEDED
+                case 'Norm1_UknwnVar'
+                    %NEEDED    
+                case 'Norm1_UknwnVar'
+                    %NEEDED
+                case 'Norm2_UkwnVar'
+                    %NEEDED
+                case 'Norm2_KnwnVar'
+                    %NEEDED
+                case 'Custom'
+                    obj.x = varargin{5};
+                    p=varargin{6};
+                    obj.pdf = Function('pdf', {obj.x,obj.theta,obj.u}, {p});
+                otherwise
+                    error('Unexpected distribution type. No PDF created.')
+             end             
           else
               error('Improper number of inputs')
           end
         end
         
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Classical Optimal Design Functions
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         function roe = optRelax(varargin)
           import casadi.*
@@ -382,15 +370,9 @@ classdef OpExD_Model
           end
         end
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Bayesian Optimal Design Functions
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        %still needed
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %Utility Functions, for convenience
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %Evaluat functions, for convenience
         function prob = evalMu(varargin)
           import casadi.*
           if nargin == 4

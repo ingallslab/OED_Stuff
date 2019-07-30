@@ -6,38 +6,14 @@ import casadi.*
 
 
 %% MODEL 1
-% MODEL 1 DEF: 
-% [y1,y2]~Norm([mu11,mu12],[mu13, mu15; mu15, mu14])
-% y3~Bern(mu2)
-% y4~Norm(mu31,mu32)
-%mu11 = theta(1) + theta(2)*u(1) +  theta(3)*u(2) + theta(4)*u(1)*u(2)
-%mu12 = theta(5) + theta(6)*u(1) +  theta(7)*u(2)
-%mu13 = theta(2)*u(1)^2
-%mu14 = theta(3)*u(2)^2
-%mu15 = theta(4)*u(1)*u(2)
-%mu2 =  theta(1)/(1+theta(1))
-%mu31 = theta(1) + theta(6)*u(1) +  theta(7)*u(2)
-%mu32 = theta(1) 
 
-%set inputs and parameter vecs
-theta=SX.sym('theta',7); %define model parameters
-u=SX.sym('u',2); %define experimental inputs
+% MODEL 1 DEF: Quadratic model, single input, constant knwn var, 
+theta=SX.sym('theta',3); %define model parameters
+u=SX.sym('u'); %define experimental inputs
+mu=[theta(1)+theta(2)*u+theta(3)*u^2 2]; %define model for mean and varaince 
+Model=OpExD_Model(theta,u,mu,'Norm1_ConstVar');
 
-%define model for pdf params
-mu1=[theta(1) + theta(2)*u(1) +  theta(3)*u(2) + theta(4)*u(1)*u(2),... $mean 1
-    theta(5) + theta(6)*u(1) +  theta(7)*u(2),... %mean 2
-    theta(2)*u(1)^2, theta(3)*u(2)^2,theta(4)*u(1)*u(2)]; %covariance parts
-mu2=[theta(1)/(1+theta(1))]; 
-mu3=[theta(1) + theta(6)*u(1) +  theta(7)*u(2), theta(1) ];
-
-%assemble model
-model={{'Norm',mu1},{'Norm',mu2},{'Norm',mu3}};
-%instantiat class
-Model1=OpExD_Model(model,theta,u);
-
-
-
-%MODE 1 TEST:
+%MODE 1 TEST
 theta_val=[4 2 .5]; u_val=2; x_val=1;%nominal params
 Model.evalPDF(x_val,theta_val, u_val)
 Model.evalLogLik(x_val,theta_val, u_val)
