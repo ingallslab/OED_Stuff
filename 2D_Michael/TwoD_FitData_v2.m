@@ -84,17 +84,86 @@ uVals=0.05:0.1:0.95;
 SSAData=cell(length(uVals),1);
 
 syms=struct('pdf_func',pdf_func,'rho_func',rho_func);
+%Section 2: Non-symbolic expressions and parameters
+alpha_1 = 13.609;
+alpha_2 = 60.882;   
+beta_1 = 3529.923;   
+beta_2 = 1053.916;      
+K_1 = 31.94;    
+K_2 = 30.0;    
+n_1  = 2.00;     
+n_2 = 2.00;     
+kappa_1 = 0.0906;   
+kappa_2 = 11.65;    
+m_1= 2.00;     
+m_2 = 2.00;
+Omega=0.01;
 
+theta=[alpha_1 alpha_2 beta_1 beta_2 K_1 K_2 n_1 n_2 kappa_1 kappa_2 m_1 m_2];
+par= [theta .5 150];
+
+u0_1=0.25;
+u0_2=20;
+x1_null=@(x_2,u_2) alpha_1 + beta_1./(1+((x_2./K_2)*(1./(1+(u_2./kappa_2).^m_2))).^n_1);
+x2_null=@(x_1,u_1) alpha_2 + beta_2./(1+((x_1./K_1)*(1./(1+(u_1./kappa_1).^m_1))).^n_2);
+
+g_func1=@(x_1,u_1,u_2) alpha_1 + beta_1*1./(1+(((alpha_2 +beta_2*1./(1+((x_1./K_1)*(1/(1+(u_1./kappa_1).^m_1))).^n_2))./K_2)*(1./(1+(u_2./kappa_2).^m_2))).^n_1)-x_1;
+g_func2=@(x_2,u_1,u_2) alpha_2 + beta_2*1./(1+(((alpha_1 +beta_1*1./(1+((x_2./K_2)*(1/(1+(u_2./kappa_2).^m_2))).^n_1))./K_1)*(1./(1+(u_1./kappa_1).^m_1))).^n_2)-x_2;
+
+g_func=@(x,u_1,u_2) [alpha_1 + beta_1./(1+((x(2)./K_2)*(1./(1+(u_2./kappa_2).^m_2))).^n_1)-x(1) alpha_2 + beta_2./(1+((x(1)./K_1)*(1./(1+(u_1./kappa_1).^m_1))).^n_2)-x(2)];
+
+B_func=@(x,u_1,u_2) [alpha_1 + beta_1./(1+((x(2)./K_2)*(1./(1+(u_2./kappa_2).^m_2))).^n_1)+x(1) 0;...
+    0 alpha_2 + beta_2./(1+((x(1)./K_1)*(1./(1+(u_1./kappa_1).^m_1))).^n_2)+x(2)];
+% for i=1:length(uVals)
+%     u1 = uVals(i);
+%     uV = (phi_2-phi_1)*u1+phi_1;
+%     u1 = uV(1);
+%     u2 = uV(2);
+%     s = dlmread(strcat('2D_Michael/Data/SliceData_Omega=0.01_u=',num2str(u1)),'\t');
+%     SSAData{i}=s(1:20,:);
+% end
+NormData=cell(length(uVals),1);
 for i=1:length(uVals)
+    disp(strcat('i = ',num2str(i)));
+    
     u1 = uVals(i);
     uV = (phi_2-phi_1)*u1+phi_1;
     u1 = uV(1);
     u2 = uV(2);
-    s = dlmread(strcat('2D_Michael/Data/SliceData_Omega=0.01_u=',num2str(u1)),'\t');
-    SSAData{i}=s(1:20,:);
+    
+    g_roots1=@(x_1) g_func1(x_1,u1,u2);
+    [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
+    
+    if (x1_low==x1_mid&&x1_mid==x1_high)
+        x2_low=x2_null(x1_low,u1);
+        
+        A= full(g_x_func([x1_low x2_low],u1,u2,theta));
+        B= B_func([x1_low x2_low],u1,u2);
+        C = lyap(A,B)/Omega;
+        
+        NormData{i} = [abs(normrnd(x1_low,sqrt(C(1,1)),[1,20]))' abs(normrnd(x2_low,sqrt(C(2,2)),[1,20]))'];
+        %scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,1),'r');
+        %scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,2),'b');
+    else
+        x2_low=x2_null(x1_high,u1);
+        x2_high=x2_null(x1_low,u1);
+        
+        Ah = full(g_x_func([x1_high x2_high],u1,u2,theta));
+        Bh = B_func([x1_high x2_low],u1,u2);
+        Ch = lyap(Ah,Bh)/Omega;
+        
+        Al = full(g_x_func([x1_low x2_low],u1,u2,theta));
+        Bl = B_func([x1_low x2_high],u1,u2);
+        Cl = lyap(Al,Bl)/Omega;
+        NormData{i} = [abs(normrnd(x1_low,sqrt(Cl(1,1)),[1,10]))' abs(normrnd(x2_low,sqrt(Cl(2,2)),[1,10]))'];
+        NormData{i} = [NormData{i}; [abs(normrnd(x1_high,sqrt(Ch(1,1)),[1,10]))' abs(normrnd(x2_high,sqrt(Ch(2,2)),[1,10]))']];
+        %scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,1),'r');
+        %scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,2),'b');
+    end
+    
 end
-
 Omega_true=0.01;
+
 alpha_1 = 13.609;
 alpha_2 = 60.882;   
 beta_1 = 3529.923;   
@@ -111,10 +180,14 @@ m_2 = 2.00;
 theta=[alpha_1 alpha_2 beta_1 beta_2 K_1 K_2 n_1 n_2 kappa_1 kappa_2 m_1 m_2];
 theta_true= [theta .5 150];
 
-objec=@(theta) Objective(uVals,SSAData,theta,Omega_true,syms);
-opti=optimset('Display','iter','FunValCheck','off','MaxFunEvals',814);
-mini=fminsearch(objec,theta_true,opti);
-disp(mini);
+
+opti=optimset('Display','iter','FunValCheck','off','MaxFunEvals',200);
+miniSet=[];
+for j=1:length(theta_true)
+    objec=@(thetA) Objective(uVals,NormData,[thetA(1:j-1) theta_true(j) thetA(j:end)],Omega_true,syms);
+    miniSet=[miniSet; fminsearch(objec,[theta_true(1:j-1) theta_true(j+1:end)],opti)];
+end
+disp(miniSet);
 
 disp('pause');
 

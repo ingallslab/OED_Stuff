@@ -34,9 +34,9 @@ function plotbif(uVals, theta, options)
         plot(u_midbranch,x_midbranch,'k:');
         plot(U_High,X_High,'k');
     else
-        plot(U_Low,X_Low,'b');
-        plot(u_midbranch,x_midbranch,'k:');
-        plot(U_High,X_High,'r');
+        plot(U_Low,X_Low,'b','LineWidth',2);
+        plot(u_midbranch,x_midbranch,'k:','LineWidth',2);
+        plot(U_High,X_High,'r','LineWidth',2);
     end
     
 end

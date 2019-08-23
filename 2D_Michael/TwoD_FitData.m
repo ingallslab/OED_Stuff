@@ -87,8 +87,11 @@ Phi=[phi_1;phi_2];
 %     s = dlmread(strcat('2D_Michael/Data/SliceData_Omega=0.01_u=',num2str(u1)),'\t');
 %     SSAData{i}=s(1:20,:);
 % end
-
+figure;
+hold on
 NormData=cell(length(uVals),1);
+uLow = 18.0019;
+uHigh = 20.2516;
 for i=1:length(uVals)
     disp(strcat('i = ',num2str(i)));
     
@@ -96,19 +99,20 @@ for i=1:length(uVals)
     uV = (phi_2-phi_1)*u1+phi_1;
     u1 = uV(1);
     u2 = uV(2);
-    
+    u=norm([u1 u2]);
     g_roots1=@(x_1) g_func1(x_1,u1,u2);
     [x1_low,x1_mid,x1_high]=fixed_point_v5(g_roots1,3000);
     
-    if (x1_low==x1_mid&&x1_mid==x1_high)
+    if u<uLow||u>uHigh
         x2_low=x2_null(x1_low,u1);
         
         A= full(g_x_func([x1_low x2_low],u1,u2,theta));
         B= B_func([x1_low x2_low],u1,u2);
         C = lyap(A,B)/Omega;
         
-        NormData{i} = [abs(normrnd(x1_low,sqrt(C(1,1)),[1,20]))' abs(normrnd(x2_low,sqrt(C(1,1)),[1,20]))'];
-        
+        NormData{i} = [abs(normrnd(x1_low,sqrt(C(1,1)),[1,20]))' abs(normrnd(x2_low,sqrt(C(2,2)),[1,20]))'];
+        scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,1),'r');
+        scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,2),'b');
     else
         x2_low=x2_null(x1_high,u1);
         x2_high=x2_null(x1_low,u1);
@@ -122,10 +126,12 @@ for i=1:length(uVals)
         Cl = lyap(Al,Bl)/Omega;
         NormData{i} = [abs(normrnd(x1_low,sqrt(Cl(1,1)),[1,10]))' abs(normrnd(x2_high,sqrt(Cl(2,2)),[1,10]))'];
         NormData{i} = [NormData{i}; [abs(normrnd(x1_high,sqrt(Ch(1,1)),[1,10]))' abs(normrnd(x2_low,sqrt(Ch(2,2)),[1,10]))']];
+        scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,1),'r');
+        scatter3(u1*ones(20,1),u2*ones(20,1),NormData{i}(:,2),'b');
     end
     
 end
-
+hold off
 
 %Generates symbolics
 syms=TwoD_Symbols_MLE(NormData,uVals);
@@ -134,9 +140,9 @@ syms=TwoD_Symbols_MLE(NormData,uVals);
 x1_m=[];x2_m=[];
 x1_l=[];x2_l=[];
 x1_h=[];x2_h=[];
-uLow = 18.0019;
-uHigh = 20.2516;
-%hold on
+
+figure;
+hold on
 for i=1:length(uVals)
     u1 = uVals(i);
     uV = (phi_2-phi_1)*u1+phi_1;
@@ -150,31 +156,53 @@ for i=1:length(uVals)
         x1_m = [x1_m x1_low];
         x2_low=x2_null(x1_high,u1);
         x2_m = [x2_m x2_low];
-        %scatter3(u1,u2,x1_low);
+        scatter3(u1,u2,x1_low,'b');
+        scatter3(u1,u2,x2_low,'r');
     elseif u>uHigh
         x1_m = [x1_m x1_high];
         x2_high=x2_null(x1_low,u1);
         x2_m = [x2_m x2_high];
-        %scatter3(u1,u2, x1_high);
+        scatter3(u1,u2, x1_high,'b');
+        scatter3(u1,u2, x2_high,'r');
     else
         x1_l=[x1_l x1_low];
         x1_h=[x1_h x1_high];
-        x2_low =x2_null(x1_high,u1);
-        x2_high=x2_null(x1_low,u1);
+        x2_low  = x2_null(x1_low,u1);
+        x2_high = x2_null(x1_high,u1);
         x2_l=[x2_l x2_low];
         x2_h=[x2_h x2_high];
-        %scatter3(u1,u2, x1_low);
-        %scatter3(u1,u2, x1_high);
+        scatter3(u1,u2, x1_low,'b');
+        scatter3(u1,u2, x1_high,'b');
+        scatter3(u1,u2, x2_low,'r');
+        scatter3(u1,u2, x2_high,'r');
     end
-    
+   
 end
-%hold off
+hold off
 format long g
 optimVars = [x1_m'; x1_h'; x1_l'; x2_m'; x2_h'; x2_l'; par']; %These are the variables that are optimized
 consts = vertcat(NormData{:}); %These are the fixed parameters in the optimizer
 consts = vertcat(consts(:));
 consts = [consts;Omega];
 
+llVals=cell(length(par),1);
+tarR=cell(length(par),1);
+figure;
+hold on
+obj = @(optV) syms.loglikF(optV,consts);
+for j=1:length(par)
+    tar=par(j);
+    tarR{j} = abs(tar-10:0.05:tar+10);
+    for i=1:length(tarR{j})
+        Tar=par;
+        Tar(j)=tarR{j}(i);
+        optV=[x1_m'; x1_h'; x1_l'; x2_m'; x2_h'; x2_l'; Tar'];
+        llVals{j}=[llVals{j} obj(optV)];
+    end
+    subplot(7,2,j);
+    plot(tarR{j},llVals{j});
+end
+hold off
 solution = syms.solver('x0',optimVars,'lbg',syms.lbg,'ubg',syms.ubg,'p',consts,'lbx',syms.lbw,'ubx',syms.ubw);
 disp(solution);
-disp("hello");
+% disp("hello");

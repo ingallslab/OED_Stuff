@@ -93,15 +93,15 @@ CO34 = [[Co2(3,3) Co2(3,4)];[Co2(4,3),Co2(4,4)]];
 
 subplots=[subplots subplot(3,3,1)];
 hold on
-
-plotErrorEllipse(subplots(1),ndm([1,2]),cov([Norm_D(:,1) Norm_D(:,2)]),[0, 255, 25]/255);
-scatter(subplots(1),ndm(1),ndm(2),25,[0, 255, 25]/255,'filled');
-
-plotErrorEllipse(subplots(1),ndsm([1,2]),cov([Norm_Ds(:,1) Norm_Ds(:,2)]),[0, 198, 19]/255);
-scatter(subplots(1),ndsm(1),ndsm(2),25,[0, 198, 19]/255,'filled');
-
-plotErrorEllipse(subplots(1),nlm([1,2]),cov([Norm_L(:,1) Norm_L(:,2)]),[0, 48, 0]/255);
-scatter(subplots(1),nlm(1),nlm(2),25,[0, 48, 0]/255,'filled');
+% 
+% plotErrorEllipse(subplots(1),ndm([1,2]),cov([Norm_D(:,1) Norm_D(:,2)]),[0, 255, 25]/255);
+% scatter(subplots(1),ndm(1),ndm(2),25,[0, 255, 25]/255,'filled');
+% 
+% plotErrorEllipse(subplots(1),ndsm([1,2]),cov([Norm_Ds(:,1) Norm_Ds(:,2)]),[0, 198, 19]/255);
+% scatter(subplots(1),ndsm(1),ndsm(2),25,[0, 198, 19]/255,'filled');
+% 
+% plotErrorEllipse(subplots(1),nlm([1,2]),cov([Norm_L(:,1) Norm_L(:,2)]),[0, 48, 0]/255);
+% scatter(subplots(1),nlm(1),nlm(2),25,[0, 48, 0]/255,'filled');
 
 plotErrorEllipse(subplots(1),sdm([1,2]),cov([SSA_D(:,1) SSA_D(:,2)]),[255, 0, 0]/255);
 scatter(subplots(1),sdm(1),sdm(2),25,[255, 0, 0]/255,'filled');
@@ -124,14 +124,14 @@ hold off
 subplots=[subplots subplot(3,3,2)];
 hold on
 
-plotErrorEllipse(subplots(2),ndm([1,3]),cov([Norm_D(:,1) Norm_D(:,3)]),[0, 255, 25]/255);
-scatter(subplots(2),ndm(1),ndm(3),25,[0, 255, 25]/255,'filled');
-
-plotErrorEllipse(subplots(2),ndsm([1,3]),cov([Norm_Ds(:,1) Norm_Ds(:,3)]),[0, 198, 19]/255);
-scatter(subplots(2),ndsm(1),ndsm(3),25,[0, 198, 19]/255,'filled');
-
-plotErrorEllipse(subplots(2),nlm([1,3]),cov([Norm_L(:,1) Norm_L(:,3)]),[0, 48, 0]/255);
-scatter(subplots(2),nlm(1),nlm(3),25,[0, 48, 0]/255,'filled');
+% plotErrorEllipse(subplots(2),ndm([1,3]),cov([Norm_D(:,1) Norm_D(:,3)]),[0, 255, 25]/255);
+% scatter(subplots(2),ndm(1),ndm(3),25,[0, 255, 25]/255,'filled');
+% 
+% plotErrorEllipse(subplots(2),ndsm([1,3]),cov([Norm_Ds(:,1) Norm_Ds(:,3)]),[0, 198, 19]/255);
+% scatter(subplots(2),ndsm(1),ndsm(3),25,[0, 198, 19]/255,'filled');
+% 
+% plotErrorEllipse(subplots(2),nlm([1,3]),cov([Norm_L(:,1) Norm_L(:,3)]),[0, 48, 0]/255);
+% scatter(subplots(2),nlm(1),nlm(3),25,[0, 48, 0]/255,'filled');
 
 plotErrorEllipse(subplots(2),sdm([1,3]),cov([SSA_D(:,1) SSA_D(:,3)]),[255, 0, 0]/255);
 scatter(subplots(2),sdm(1),sdm(3),25,[255, 0, 0]/255,'filled');
@@ -153,15 +153,15 @@ hold off
 
 subplots=[subplots subplot(3,3,3)];
 hold on
-
-plotErrorEllipse(subplots(3),ndm([1,4]),cov([Norm_D(:,1) Norm_D(:,4)]),[0, 255, 25]/255);
-scatter(subplots(3),ndm(1),ndm(4),25,[0, 255, 25]/255,'filled');
-
-plotErrorEllipse(subplots(3),ndsm([1,4]),cov([Norm_Ds(:,1) Norm_Ds(:,4)]),[0, 198, 19]/255);
-scatter(subplots(3),ndsm(1),ndsm(4),25,[0, 198, 19]/255,'filled');
-
-plotErrorEllipse(subplots(3),nlm([1,4]),cov([Norm_L(:,1) Norm_L(:,4)]),[0, 48, 0]/255);
-scatter(subplots(3),nlm(1),nlm(4),25,[0, 48, 0]/255,'filled');
+% 
+% plotErrorEllipse(subplots(3),ndm([1,4]),cov([Norm_D(:,1) Norm_D(:,4)]),[0, 255, 25]/255);
+% scatter(subplots(3),ndm(1),ndm(4),25,[0, 255, 25]/255,'filled');
+% 
+% plotErrorEllipse(subplots(3),ndsm([1,4]),cov([Norm_Ds(:,1) Norm_Ds(:,4)]),[0, 198, 19]/255);
+% scatter(subplots(3),ndsm(1),ndsm(4),25,[0, 198, 19]/255,'filled');
+% 
+% plotErrorEllipse(subplots(3),nlm([1,4]),cov([Norm_L(:,1) Norm_L(:,4)]),[0, 48, 0]/255);
+% scatter(subplots(3),nlm(1),nlm(4),25,[0, 48, 0]/255,'filled');
 
 plotErrorEllipse(subplots(3),sdm([1,4]),cov([SSA_D(:,1) SSA_D(:,4)]),[255, 0, 0]/255);
 scatter(subplots(3),sdm(1),sdm(4),25,[255, 0, 0]/255,'filled');
@@ -184,14 +184,14 @@ hold off
 subplots=[subplots subplot(3,3,4)];
 hold on
 
-plotErrorEllipse(subplots(4),ndm([2,3]),cov([Norm_D(:,2) Norm_D(:,3)]),[0, 255, 25]/255);
-scatter(subplots(4),ndm(2),ndm(3),25,[0, 255, 25]/255,'filled');
-
-plotErrorEllipse(subplots(4),ndsm([2,3]),cov([Norm_Ds(:,2) Norm_Ds(:,3)]),[0, 198, 19]/255);
-scatter(subplots(4),ndsm(2),ndsm(3),25,[0, 198, 19]/255,'filled');
-
-plotErrorEllipse(subplots(4),nlm([2,3]),cov([Norm_L(:,2) Norm_L(:,3)]),[0, 48, 0]/255);
-scatter(subplots(4),nlm(2),nlm(3),25,[0, 48, 0]/255,'filled');
+% plotErrorEllipse(subplots(4),ndm([2,3]),cov([Norm_D(:,2) Norm_D(:,3)]),[0, 255, 25]/255);
+% scatter(subplots(4),ndm(2),ndm(3),25,[0, 255, 25]/255,'filled');
+% 
+% plotErrorEllipse(subplots(4),ndsm([2,3]),cov([Norm_Ds(:,2) Norm_Ds(:,3)]),[0, 198, 19]/255);
+% scatter(subplots(4),ndsm(2),ndsm(3),25,[0, 198, 19]/255,'filled');
+% 
+% plotErrorEllipse(subplots(4),nlm([2,3]),cov([Norm_L(:,2) Norm_L(:,3)]),[0, 48, 0]/255);
+% scatter(subplots(4),nlm(2),nlm(3),25,[0, 48, 0]/255,'filled');
 
 plotErrorEllipse(subplots(4),sdm([2,3]),cov([SSA_D(:,2) SSA_D(:,3)]),[255, 0, 0]/255);
 scatter(subplots(4),sdm(2),sdm(3),25,[255, 0, 0]/255,'filled');
@@ -213,15 +213,15 @@ hold off
 
 subplots=[subplots subplot(3,3,5)];
 hold on
-
-plotErrorEllipse(subplots(5),ndm([2,4]),cov([Norm_D(:,2) Norm_D(:,4)]),[0, 255, 25]/255);
-scatter(subplots(5),ndm(2),ndm(4),25,[0, 255, 25]/255,'filled');
-
-plotErrorEllipse(subplots(5),ndsm([2,4]),cov([Norm_Ds(:,2) Norm_Ds(:,4)]),[0, 198, 19]/255);
-scatter(subplots(5),ndsm(2),ndsm(4),25,[0, 198, 19]/255,'filled');
-
-plotErrorEllipse(subplots(5),nlm([2,4]),cov([Norm_L(:,2) Norm_L(:,4)]),[0, 48, 0]/255);
-scatter(subplots(5),nlm(2),nlm(4),25,[0, 48, 0]/255,'filled');
+% 
+% plotErrorEllipse(subplots(5),ndm([2,4]),cov([Norm_D(:,2) Norm_D(:,4)]),[0, 255, 25]/255);
+% scatter(subplots(5),ndm(2),ndm(4),25,[0, 255, 25]/255,'filled');
+% 
+% plotErrorEllipse(subplots(5),ndsm([2,4]),cov([Norm_Ds(:,2) Norm_Ds(:,4)]),[0, 198, 19]/255);
+% scatter(subplots(5),ndsm(2),ndsm(4),25,[0, 198, 19]/255,'filled');
+% 
+% plotErrorEllipse(subplots(5),nlm([2,4]),cov([Norm_L(:,2) Norm_L(:,4)]),[0, 48, 0]/255);
+% scatter(subplots(5),nlm(2),nlm(4),25,[0, 48, 0]/255,'filled');
 
 plotErrorEllipse(subplots(5),sdm([2,4]),cov([SSA_D(:,2) SSA_D(:,4)]),[255, 0, 0]/255);
 scatter(subplots(5),sdm(2),sdm(4),25,[255, 0, 0]/255,'filled');
@@ -243,15 +243,15 @@ hold off
 
 subplots=[subplots subplot(3,3,6)];
 hold on
-
-plotErrorEllipse(subplots(6),ndm([3,4]),cov([Norm_D(:,3) Norm_D(:,4)]),[0, 255, 25]/255,'Normal D-Optimal');
-scatter(subplots(6),ndm(3),ndm(4),25,[0, 255, 25]/255,'filled','HandleVisibility','off');
-
-plotErrorEllipse(subplots(6),ndsm([3,4]),cov([Norm_Ds(:,3) Norm_Ds(:,4)]),[0, 198, 19]/255,'Normal Ds-Optimal');
-scatter(subplots(6),ndsm(3),ndsm(4),25,[0, 198, 19]/255,'filled','HandleVisibility','off');
-
-plotErrorEllipse(subplots(6),nlm([3,4]),cov([Norm_L(:,3) Norm_L(:,4)]),[0, 48, 0]/255,'Normal Non-OED');
-scatter(subplots(6),nlm(3),nlm(4),25,[0, 48, 0]/255,'filled','HandleVisibility','off');
+% 
+% plotErrorEllipse(subplots(6),ndm([3,4]),cov([Norm_D(:,3) Norm_D(:,4)]),[0, 255, 25]/255,'Normal D-Optimal');
+% scatter(subplots(6),ndm(3),ndm(4),25,[0, 255, 25]/255,'filled','HandleVisibility','off');
+% 
+% plotErrorEllipse(subplots(6),ndsm([3,4]),cov([Norm_Ds(:,3) Norm_Ds(:,4)]),[0, 198, 19]/255,'Normal Ds-Optimal');
+% scatter(subplots(6),ndsm(3),ndsm(4),25,[0, 198, 19]/255,'filled','HandleVisibility','off');
+% 
+% plotErrorEllipse(subplots(6),nlm([3,4]),cov([Norm_L(:,3) Norm_L(:,4)]),[0, 48, 0]/255,'Normal Non-OED');
+% scatter(subplots(6),nlm(3),nlm(4),25,[0, 48, 0]/255,'filled','HandleVisibility','off');
 
 plotErrorEllipse(subplots(6),sdm([3,4]),cov([SSA_D(:,3) SSA_D(:,4)]),[255, 0, 0]/255,'SSA D-Optimal');
 scatter(subplots(6),sdm(3),sdm(4),25,[255, 0, 0]/255,'filled','HandleVisibility','off');
@@ -272,11 +272,8 @@ title(subplots(6),'n versus K');
 xlabel(subplots(6),'K'); ylabel(subplots(6),'n');
 hold off
 
-hleg = subplot(3,3,7);
-axis(hleg,'off');
-pleg = get(hleg,'Position');
-leg=legend(subplot(3,3,6));
-set(leg,'Position',pleg);
+leg=legend(subplots(6));
+set(leg,'Location','southeast')
 saveas(h,'Covariance_Plot_500x8_90.png');
 
 % figure

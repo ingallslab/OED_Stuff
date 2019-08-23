@@ -72,8 +72,8 @@ function syms = TwoD_Symbols_MLE(xVals,uVals)
     pdf=exp(-.5*(x_obs_sym-x_sym)*inv(C)*(x_obs_sym-x_sym)')/sqrt(det(C)*(2*pi)^2);
     pdf_func = Function('pdf_func', {x_obs_sym,x_sym,u_cntrl_sym,theta_sym,Omega_sym}, {pdf});
 
-    pdf_low=pdf_func(x_obs_sym,[x1_low_sym,x2_high_sym],u_cntrl_sym,theta_sym,Omega_sym);
-    pdf_high=pdf_func(x_obs_sym,[x1_high_sym,x2_low_sym],u_cntrl_sym,theta_sym,Omega_sym);
+    pdf_low=pdf_func(x_obs_sym,[x1_low_sym,x2_low_sym],u_cntrl_sym,theta_sym,Omega_sym);
+    pdf_high=pdf_func(x_obs_sym,[x1_high_sym,x2_high_sym],u_cntrl_sym,theta_sym,Omega_sym);
 
     rho=1/(1+exp(-(gamma1_sym*(u_cntrl_sym-gamma0_sym))));
     Lik=rho*pdf_low+(1-rho)*pdf_high;
@@ -238,7 +238,7 @@ function syms = TwoD_Symbols_MLE(xVals,uVals)
     
     disp('solver has generated, beginning optimization');
     LF = Function('logLik_tot',{optimVars,p},{logLik_tot});
-    lF = @(a,b) LF(a,b); %Numerical output
+    lF = @(a,b) full(LF(a,b)); %Numerical output
     
     %This just spits out the symbols in a struct
     syms = struct('theta_sym',theta_sym,'optimVars',optimVars, 'logLik_tot',logLik_tot,'loglikF',...
