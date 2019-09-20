@@ -3,8 +3,6 @@ clear all
 addpath('/Users/mrastwoo/Documents/MATLAB/Casadi/casadi-osx-matlabR2015a-v3.4.5')
 import casadi.*
 
-
-
 %% MODEL 1
 % MODEL 1 DEF: 
 % [y1,y2]~Norm([mu11,mu12],[mu13, mu15; mu15, mu14])
